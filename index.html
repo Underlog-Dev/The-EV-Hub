@@ -1,0 +1,1302 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The EV Hub</title>
+<meta name="description" content="The EV Hub: football statistics, model probabilities, fair odds and expected value. Demo mode: sample data, not live betting odds.">
+<meta name="theme-color" content="#090D0B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The EV Hub">
+<meta name="application-name" content="The EV Hub">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<style>:root{--bg:#090D0B;--panel:#111714;--panel2:#161E1A;--panel3:#1C2621;--line:#24302A;--line2:#2E3B34;--text:#FFFFFF;--muted:#9AA8A0;--dim:#6E7B74;
+--pos:#39E58C;--neg:#FF5C65;--zero:#8D9792;--acc:#39E58C;--acc2:#2BC277;--warn:#F2C14E;--r:14px;--top:56px;--bot:64px;--safe-b:env(safe-area-inset-bottom,0px);color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}html{-webkit-text-size-adjust:100%;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;overflow-x:hidden;min-height:100vh}
+body.noscroll{overflow:hidden}
+a{color:var(--text)}a:hover{color:var(--acc)}
+h1{font-size:28px;letter-spacing:-.02em;margin:0 0 4px;line-height:1.15}h2{font-size:18px;margin:18px 0 8px;letter-spacing:-.01em}h3{font-size:15px;margin:18px 0 8px}
+.muted{color:var(--muted)}.xs{font-size:12px}.warn{color:var(--warn)}.nw{white-space:nowrap}
+/* demo bar + header */
+.demobar{position:sticky;top:0;z-index:40;background:#1A1405;color:var(--warn);font:700 11px/1 -apple-system,sans-serif;letter-spacing:.08em;text-align:center;padding:7px 10px;border-bottom:1px solid #3A2E0C}
+header.top{position:sticky;top:25px;z-index:35;display:flex;align-items:center;gap:12px;height:var(--top);padding:0 16px;background:rgba(9,13,11,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.logo{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:9px;background:linear-gradient(145deg,#1B2A22,#0C120F);border:1px solid #2F4A3B;color:var(--acc);font:900 13px/1 -apple-system,sans-serif;letter-spacing:-.03em;box-shadow:inset 0 0 0 1px rgba(57,229,140,.08)}
+.bname{font-size:17px}
+.topnav{display:none;margin-left:auto;gap:2px}.topnav a,.botnav a{text-decoration:none;color:var(--muted)}
+.topnav a{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:9px;font-size:14px;font-weight:600}.topnav a svg{width:17px;height:17px}
+.topnav a.on,.topnav a:hover{color:var(--text);background:var(--panel2)}.topnav a.on svg{stroke:var(--acc)}
+.topact{margin-left:auto;display:flex;gap:6px}.iconbtn{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;color:var(--muted);border:1px solid var(--line)}.iconbtn.on{color:var(--acc);border-color:#2F4A3B}
+svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.iconbtn svg{width:19px;height:19px}
+.botnav{position:fixed;left:0;right:0;bottom:0;z-index:35;display:grid;grid-template-columns:repeat(5,1fr);height:calc(var(--bot) + var(--safe-b));padding-bottom:var(--safe-b);background:rgba(10,14,12,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.botnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600}.botnav a svg{width:22px;height:22px}.botnav a.on{color:var(--text)}.botnav a.on svg{stroke:var(--acc)}
+main{padding:16px 16px calc(var(--bot) + var(--safe-b) + 28px);max-width:1280px;margin:0 auto;outline:none}
+@media (min-width:1000px){.topnav{display:flex}.topact{display:none}.botnav{display:none}main{padding:24px 28px 60px}}
+/* building */
+.splash{min-height:70vh;display:grid;place-items:center;text-align:center}.splash .logo{width:64px;height:64px;font-size:24px;border-radius:18px;margin:0 auto 14px}.splash p{color:var(--muted)}
+.spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line2);border-top-color:var(--acc);animation:sp 0.8s linear infinite;margin:14px auto}@keyframes sp{to{transform:rotate(360deg)}}
+/* pieces */
+.phead{margin:2px 0 12px}.phead p{margin:4px 0 0}.back{display:inline-block;margin-bottom:6px;color:var(--muted);text-decoration:none;font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:0 0 12px;min-width:0}
+.card h2{margin-top:0}.ch{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}.ch h2{margin:0}
+.banner{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:14px}
+.banner.demo{background:#17130A;border-color:#3A2E0C;color:#F5DFA0}.banner.demo b{color:var(--warn)}
+.demotag{display:inline-block;font:800 10px/1 -apple-system,sans-serif;letter-spacing:.06em;color:var(--warn);border:1px solid #4A3A10;background:#16120A;border-radius:6px;padding:4px 6px;vertical-align:middle;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:8px 14px;border-radius:11px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);font:600 14px/1.1 inherit;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:#3A4A41}.btn.on{border-color:var(--acc);color:var(--acc)}.btn.acc{background:var(--acc);border-color:var(--acc);color:#04140B}.btn.acc:hover{background:#4CF09B;color:#04140B}
+.btn.ghost{background:transparent}.btn.sm{min-height:32px;padding:5px 10px;font-size:13px;border-radius:9px}.btn.wide{width:100%;margin-top:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.badge{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--acc);color:#04140B;font-size:11px;font-weight:800}
+.linkbtn{background:none;border:0;padding:0;color:var(--text);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;font:inherit;cursor:pointer}
+.in{width:100%;min-height:42px;padding:9px 12px;border-radius:11px;border:1px solid var(--line2);background:var(--bg);color:var(--text);font:16px/1.2 inherit}
+.in:focus{outline:2px solid var(--acc);outline-offset:1px;border-color:transparent}select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--panel2);color:var(--muted);font:600 13px/1.1 inherit;cursor:pointer;text-decoration:none}
+.chip.on{color:var(--text);border-color:var(--acc);background:#11241A}.chip small{color:var(--dim)}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:3px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.seg button{min-height:34px;padding:6px 12px;border:0;border-radius:9px;background:none;color:var(--muted);font:600 13px/1.1 inherit;cursor:pointer}.seg button.on{background:var(--panel3);color:var(--text);box-shadow:inset 0 0 0 1px #2F4A3B}
+.ck{display:flex;align-items:flex-start;gap:8px;padding:6px 0;cursor:pointer;font-size:14px}.ck input{width:18px;height:18px;margin:1px 0 0;accent-color:var(--acc);flex:0 0 auto}.ck.dis{opacity:.6;cursor:default}
+.empty{text-align:center;padding:40px 16px;border:1px dashed var(--line2);border-radius:var(--r)}.empty .btn{margin-top:10px}
+/* EV colours: meaningful only */
+.ev-pos{color:var(--pos)}.ev-neg{color:var(--neg)}.ev-zero,.ev-na{color:var(--zero)}
+.ev-posbg{background:var(--pos)}.ev-negbg{background:#5A2A2E}
+.conf{display:inline-block;font-size:12px;font-weight:700;padding:3px 7px;border-radius:7px;border:1px solid var(--line2)}.conf-high{color:var(--text);border-color:#3C5B4A}.conf-medium{color:#D4DBD7}.conf-low{color:var(--muted);border-style:dashed}
+.lg{display:inline-block;font:800 10px/1 -apple-system,sans-serif;letter-spacing:.04em;padding:4px 6px;border-radius:6px;background:var(--panel3);color:#CFD8D3;border:1px solid var(--line2);vertical-align:1px}
+.form{display:inline-flex;gap:3px}.form i{font-style:normal;display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 3px;border-radius:6px;font-size:11px;font-weight:700}.form .fh{background:#16301F;color:#BFF5D7}.form .fm{background:var(--panel3);color:var(--dim)}
+.dot{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;margin-right:3px;font-size:12px}.dot.fh{background:#16301F}.dot.fm{background:var(--panel3);color:var(--dim)}
+.minetag{font-size:10px;font-weight:800;color:var(--acc);border:1px solid #2F4A3B;border-radius:5px;padding:1px 4px;margin-left:3px;vertical-align:1px}
+/* tables */
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);max-width:100%;overscroll-behavior-x:contain}
+.tbl{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px}
+.tbl th,.tbl td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+.tbl tr:first-child th{position:sticky;top:0;background:var(--panel2);color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;z-index:2}
+.tbl .n{text-align:right}.tbl th.sel{position:sticky;left:0;z-index:1;background:var(--panel);min-width:150px;max-width:210px;white-space:normal;box-shadow:1px 0 0 var(--line)}
+.tbl tr:first-child th.sel{z-index:3;background:var(--panel2)}
+.tbl th.sel b{display:block;font-size:14px}.tbl th.sel small{display:block;color:var(--muted);font-weight:500;font-size:12px;margin-top:1px}
+.tbl tr[data-detail],.tbl tr[data-player],.tbl tr[data-team]{cursor:pointer}.tbl tr[data-detail]:hover td,.tbl tr[data-detail]:hover th.sel,.tbl tr[data-player]:hover td,.tbl tr[data-team]:hover td{background:#141C18}
+.tbl td small{color:var(--muted)}.tbl .cfx span{display:block;max-width:220px;overflow:hidden;text-overflow:ellipsis}.tbl .cfx small{display:block}
+.tbl.compact th,.tbl.compact td{padding:7px 9px}.tbl tr.dim th,.tbl tr.dim td{color:var(--dim)}.tbl tr.stale td,.tbl tr.stale th{opacity:.55}.tbl tr.chosen td,.tbl tr.chosen th.sel{background:#102018}
+.sorth{background:none;border:0;padding:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}.sorth.on{color:var(--acc)}
+.pos{display:inline-block;min-width:18px;color:var(--muted)}.wdl{font-style:normal;display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 4px;border-radius:5px;font-size:11px;font-weight:800;margin-right:2px;background:var(--panel3);color:var(--muted)}.w-W{background:#16301F;color:#BFF5D7}.w-L{background:#2E1719;color:#FFC2C6}
+/* explorer */
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:0 16px;border-bottom:1px solid var(--line)}.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:11px 12px;border:0;background:none;color:var(--muted);font:700 14px/1 inherit;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}.tab.on{color:var(--text);border-bottom-color:var(--acc)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}.toolbar .search{flex:1 1 220px}.toolbar select.in{flex:1 1 160px;width:auto}
+.sortl{display:flex;flex-direction:column;gap:2px;flex:1 1 200px}.sortl select.in{flex:none;width:100%}.tbtns{display:flex;gap:6px;flex-wrap:wrap}
+.fpanel,.colpanel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin:0 0 12px}
+.colpanel{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:0 12px}
+.fgrid{display:grid;grid-template-columns:1fr;gap:12px}@media (min-width:720px){.fgrid{grid-template-columns:1fr 1fr}.fgrid .wide{grid-column:1/-1}}
+.fr{display:flex;flex-direction:column;gap:6px;min-width:0}.flab{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.02em}.flab small{font-weight:500}
+.rng{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.rng .in{flex:1 1 90px;width:auto}.rng span{color:var(--dim);font-size:13px}
+.fxbox{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:11px;padding:2px 10px;background:var(--bg)}.fxbox .ck small{color:var(--muted)}
+.presets .plist{display:flex;flex-wrap:wrap;gap:6px}.pitem{display:inline-flex;align-items:center;gap:4px}
+.basisrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.reshead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px}.reshead p{margin:0}
+/* dashboard */
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;padding:18px;margin:0 0 12px;border-radius:18px;border:1px solid var(--line);background:radial-gradient(120% 140% at 100% 0%,rgba(57,229,140,.13),transparent 55%),linear-gradient(180deg,#101713,#0B100D)}
+.hero h1{font-size:34px}.eyebrow{margin:0 0 4px;color:var(--acc);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.herocta{display:flex;gap:8px;flex-wrap:wrap}
+.dashf{display:flex;flex-wrap:wrap;gap:12px 20px;margin:0 0 12px}.dashf>div{display:flex;flex-direction:column;gap:6px}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 12px}@media (min-width:720px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1000px){.kpis{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.kpis.four{grid-template-columns:repeat(2,minmax(0,1fr))}@media (min-width:620px){.kpis.four{grid-template-columns:repeat(4,minmax(0,1fr))}}.kpis.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;min-width:0;display:flex;flex-direction:column;gap:3px}.kpi small{color:var(--muted);font-size:12px;font-weight:600}.kpi b{font-size:22px;letter-spacing:-.02em;line-height:1.15}.kpi.sm b{font-size:18px}.kpi b small{font-size:12px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px}@media (min-width:1000px){.grid2{grid-template-columns:1fr 1fr}.grid2 .wide{grid-column:1/-1}}.grid2>.card{margin:0}
+.toplist,.mvlist,.fxlist,.alist{list-style:none;margin:0;padding:0}
+.toplist li,.mvlist li,.alist li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}.toplist li:last-child,.mvlist li:last-child{border-bottom:0}
+.toplist{counter-reset:t}.toplist li::before{counter-increment:t;content:counter(t);flex:0 0 22px;height:22px;display:grid;place-items:center;border-radius:7px;background:var(--panel3);color:var(--muted);font-size:12px;font-weight:800}
+.toplist li>div:first-of-type,.mvlist li>div:first-child,.alist li>div:first-child{flex:1;min-width:0}.toplist small,.mvlist small,.alist small{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis}
+.tr{display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;font-size:13px;white-space:nowrap}
+.fxlist li a{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none}.fxlist small{color:var(--muted)}
+.hist{display:flex;align-items:flex-end;gap:6px;height:130px;padding:8px 0}.hist .hb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px;min-width:0}.hist .hb i{width:100%;border-radius:5px 5px 2px 2px;min-height:2px}.hist .hb small{font-size:10px;color:var(--muted)}.hist .hb b{font-size:11px}
+.quick{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.srcs{display:grid;grid-template-columns:1fr;gap:8px}@media (min-width:720px){.srcs{grid-template-columns:repeat(2,1fr)}}
+.src{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;background:var(--panel2)}.src span{font-size:13px}.src small{color:var(--muted);font-size:12px}.src.on{border-color:#2F4A3B}.src.on span{color:var(--acc)}.src.off span{color:var(--muted)}
+/* fixtures */
+.dayh{margin:18px 0 8px}.fxgrid{display:grid;grid-template-columns:1fr;gap:10px}@media (min-width:640px){.fxgrid{grid-template-columns:repeat(2,1fr)}}@media (min-width:1000px){.fxgrid{grid-template-columns:repeat(3,1fr)}}
+.fxcard{display:block;text-decoration:none;margin:0}.fxcard:hover{border-color:#2F4A3B;color:var(--text)}.fxtop{display:flex;justify-content:space-between}.fxteams{display:flex;flex-direction:column;margin:8px 0;font-size:16px}
+.fx3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.fx3 span{background:var(--panel2);border-radius:9px;padding:6px;text-align:center;font-weight:700}.fx3 small{display:block;color:var(--muted);font-size:11px;font-weight:600}
+.nextfx{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.nextfx>div{display:flex;flex-direction:column}
+/* sheet */
+.sheetwrap{position:fixed;inset:0;z-index:60}.sheetbg{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.sheet{position:absolute;left:0;right:0;bottom:0;top:28px;background:var(--bg);border-top:1px solid var(--line2);border-radius:18px 18px 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:18px 16px calc(28px + var(--safe-b));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(30px)}}@media (min-width:1000px){.sheet{left:auto;top:0;width:720px;border-radius:0;border-left:1px solid var(--line2);border-top:0;padding:24px}}
+.sheetx{position:sticky;top:0;float:right;z-index:3;width:38px;height:38px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);color:var(--text);font-size:16px;cursor:pointer}
+.dhead h2{margin:8px 0 2px;font-size:24px}.dhead p{margin:2px 0}.dsel{font-size:16px}.dctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.pbar{position:relative;height:6px;border-radius:3px;background:var(--panel3);margin-top:6px}.pbar .pr{position:absolute;top:0;bottom:0;background:#3B4A42;border-radius:3px}.pbar .pp{position:absolute;top:-3px;width:2px;height:12px;background:var(--text);border-radius:1px}
+.kelly .krow{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}.kelly .field{display:flex;flex-direction:column;gap:4px;width:140px}
+.why p{margin:0 0 8px}.warnlist{margin:0;padding-left:18px;color:#D9E0DC;font-size:14px}.warnlist li{margin:3px 0}
+.doc{margin:6px 0;padding-left:20px}.doc li{margin:6px 0}
+/* charts */
+.chartwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:8px 6px 2px;margin:0 0 10px}
+.chartwrap svg{display:block}.bhit{fill:var(--pos);opacity:.85}.bno{fill:#3A4741}.bneu{fill:#5D6B64}.bmiss{fill:var(--dim)}.blab{fill:#DDE5E0;font-size:10px;text-anchor:middle;font-weight:700}.bax{fill:var(--dim);font-size:9px;text-anchor:middle}
+.bline{stroke:#fff;stroke-dasharray:4 4;stroke-width:1.2;opacity:.75}.bltxt{fill:#fff;font-size:10px;font-weight:700}
+.spark{vertical-align:middle}.spark polyline{stroke:var(--muted);stroke-width:1.6}.spark.up polyline{stroke:#CFD8D3}.mv{font-size:12px;color:var(--muted)}.mvup,.mvdn{color:#DDE5E0}
+/* alerts */
+.alist li.blocked{opacity:.6}
+.booknotes{margin:8px 0;padding-left:18px}
+/* toasts */
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bot) + var(--safe-b) + 14px);z-index:80;display:flex;flex-direction:column;gap:6px;width:min(92vw,420px)}
+.toast{background:var(--panel3);border:1px solid var(--line2);border-radius:12px;padding:10px 14px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:opacity .5s}.toast.out{opacity:0}
+@media (min-width:1000px){#toasts{bottom:20px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:560px){.toplist li,.mvlist li,.alist li{flex-wrap:wrap}.toplist li .tr,.mvlist li .tr,.alist li .tr{width:100%;flex-direction:row;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 10px;text-align:left}.toplist li .tr{padding-left:32px}}
+</style>
+</head>
+<body>
+<div class="splash" id="splash"><div><span class="logo">EV</span><h1>The EV Hub</h1><div class="spin"></div><p>Building the demo data…</p><p class="xs">DEMO MODE — SAMPLE DATA, NOT LIVE BETTING ODDS</p></div></div>
+<noscript><p style="padding:20px">The EV Hub needs JavaScript.</p></noscript>
+<script>/* The EV Hub — core helpers (no dependencies). Everything lives on window.EV. */
+'use strict';
+const EV = (window.EV = window.EV || {});
+EV.VERSION = '7aa4d8b97c';
+EV.DEMO = true; // Phase 1: every figure comes from the bundled synthetic dataset
+
+// ---------- small helpers
+EV.$ = (s, r = document) => r.querySelector(s);
+EV.$$ = (s, r = document) => [...r.querySelectorAll(s)];
+EV.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+EV.clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+EV.sum = a => a.reduce((t, x) => t + x, 0);
+EV.mean = a => (a.length ? EV.sum(a) / a.length : null);
+EV.num = v => (v === '' || v == null || !Number.isFinite(Number(v)) ? null : Number(v));
+EV.uniq = a => [...new Set(a)];
+EV.byKey = (a, k) => Object.fromEntries(a.map(x => [x[k], x]));
+
+// ---------- seeded random numbers (the demo data is identical on every visit)
+EV.rng = seed => { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+EV.hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+EV.normal = r => { let u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+EV.gammaS = (r, k) => { // Marsaglia–Tsang, k > 0
+  if (k < 1) return EV.gammaS(r, k + 1) * Math.pow(r(), 1 / k);
+  const d = k - 1 / 3, c = 1 / Math.sqrt(9 * d);
+  for (;;) { let x, v; do { x = EV.normal(r); v = 1 + c * x; } while (v <= 0); v = v * v * v; const u = r(); if (u < 1 - 0.0331 * x ** 4 || Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v; }
+};
+EV.poisS = (r, lam) => { if (lam <= 0) return 0; if (lam > 30) return Math.max(0, Math.round(lam + Math.sqrt(lam) * EV.normal(r))); const L = Math.exp(-lam); let k = 0, p = 1; do { k++; p *= r(); } while (p > L); return k - 1; };
+EV.nbS = (r, mean, disp) => (mean <= 0 ? 0 : EV.poisS(r, EV.gammaS(r, disp) * (mean / disp))); // negative binomial (Poisson–gamma)
+
+// ---------- probability distributions (used by the demo model)
+const LF = [0]; for (let i = 1; i < 400; i++) LF[i] = LF[i - 1] + Math.log(i);
+EV.lgamma = z => { // Lanczos
+  const g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - EV.lgamma(1 - z);
+  z -= 1; let x = c[0]; for (let i = 1; i < g + 2; i++) x += c[i] / (z + i); const t = z + g + 0.5;
+  return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+};
+EV.poisPmf = (k, lam) => (lam <= 0 ? (k === 0 ? 1 : 0) : Math.exp(-lam + k * Math.log(lam) - (LF[k] ?? EV.lgamma(k + 1))));
+EV.nbPmf = (k, mean, disp) => { if (mean <= 0) return k === 0 ? 1 : 0; if (!Number.isFinite(disp) || disp > 1e6) return EV.poisPmf(k, mean); const p = disp / (disp + mean); return Math.exp(EV.lgamma(k + disp) - EV.lgamma(disp) - (LF[k] ?? EV.lgamma(k + 1)) + disp * Math.log(p) + k * Math.log(1 - p)); };
+EV.pmfArr = (mean, disp, max) => { // recurrence: fast enough to price tens of thousands of selections on a phone
+  const a = new Array(max + 1).fill(0); if (mean <= 0) { a[0] = 1; return a; }
+  if (!Number.isFinite(disp) || disp > 1e6) { a[0] = Math.exp(-mean); for (let k = 1; k <= max; k++) a[k] = (a[k - 1] * mean) / k; }
+  else { const p = disp / (disp + mean); a[0] = Math.pow(p, disp); for (let k = 1; k <= max; k++) a[k] = (a[k - 1] * (k - 1 + disp) * (1 - p)) / k; }
+  const s = EV.sum(a); if (s < 1) a[max] += 1 - s; return a; };
+EV.conv = (a, b) => { const out = new Array(a.length + b.length - 1).fill(0); a.forEach((x, i) => b.forEach((y, j) => { out[i + j] += x * y; })); return out; };
+EV.atLeast = (pmf, k) => EV.clamp(EV.sum(pmf.slice(Math.max(0, k))), 0, 1);
+
+// ---------- odds: decimal internally; fractional ladder like UK bookmakers
+EV.LADDER = [[1, 20], [1, 16], [1, 12], [1, 10], [1, 9], [1, 8], [2, 15], [1, 7], [1, 6], [2, 11], [1, 5], [2, 9], [1, 4], [2, 7], [3, 10], [1, 3], [4, 11], [2, 5], [4, 9], [1, 2], [8, 15], [4, 7], [8, 13], [4, 6], [8, 11], [4, 5], [5, 6], [10, 11], [1, 1], [21, 20], [11, 10], [6, 5], [5, 4], [11, 8], [6, 4], [13, 8], [7, 4], [15, 8], [2, 1], [9, 4], [5, 2], [11, 4], [3, 1], [10, 3], [7, 2], [4, 1], [9, 2], [5, 1], [11, 2], [6, 1], [13, 2], [7, 1], [15, 2], [8, 1], [9, 1], [10, 1], [11, 1], [12, 1], [14, 1], [16, 1], [18, 1], [20, 1], [25, 1], [33, 1], [40, 1], [50, 1], [66, 1], [80, 1], [100, 1]].map(([a, b]) => ({ a, b, dec: 1 + a / b }));
+EV.snapDown = dec => { let best = EV.LADDER[0]; for (const s of EV.LADDER) if (s.dec <= dec + 1e-9) best = s; return best.dec; }; // bookmakers round in their own favour
+EV.fracOf = dec => { const s = EV.LADDER.find(x => Math.abs(x.dec - dec) < 0.004); if (s) return s.a === s.b ? 'Evens' : `${s.a}/${s.b}`; const f = dec - 1; for (const den of [1, 2, 4, 5, 8, 10, 20, 100]) { const n = Math.round(f * den); if (Math.abs(n / den - f) < 0.006) { const g = gcd(n, den); return `${n / g}/${den / g}`; } } return `${(f * 100).toFixed(0)}/100`; };
+function gcd(a, b) { return b ? gcd(b, a % b) : Math.abs(a) || 1; }
+EV.amerOf = dec => (dec >= 2 ? `+${Math.round((dec - 1) * 100)}` : `−${Math.round(100 / (dec - 1))}`);
+EV.fmtOdds = (dec, fmt = EV.settings ? EV.settings.oddsFmt : 'dec') => { if (!Number.isFinite(dec) || dec <= 1) return '—'; return fmt === 'frac' ? EV.fracOf(dec) : fmt === 'amer' ? EV.amerOf(dec) : dec.toFixed(2); };
+EV.parseOdds = t => { const s = String(t ?? '').trim().toLowerCase().replace(/\s+/g, '').replace(',', '.'); if (!s) return null; if (['evens', 'evs', 'ev'].includes(s)) return 2;
+  let m = /^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(s); if (m) { const v = 1 + Number(m[1]) / Number(m[2]); return Number.isFinite(v) && v > 1 ? v : null; }
+  m = /^([+-−])(\d+)$/.exec(s); if (m) { const a = Number(m[2]); if (a < 100) return null; return m[1] === '+' ? 1 + a / 100 : 1 + 100 / a; }
+  const d = Number(s); return Number.isFinite(d) && d > 1 ? d : null; };
+
+// ---------- the EV maths (documented in the app and README)
+EV.fair = p => (p > 0 ? 1 / p : null);
+EV.evPct = (p, O) => (p > 0 && O > 1 ? (p * O - 1) * 100 : null); // EV (%) = (p × O − 1) × 100
+EV.kelly = (p, O) => (p > 0 && O > 1 ? (p * O - 1) / (O - 1) : null); // full Kelly fraction of bankroll (negative = no bet)
+
+// ---------- formatting
+EV.pct = (x, d = 1) => (x == null || !Number.isFinite(x) ? '—' : x > 0 && x < 0.001 ? '<0.1%' : `${(x * 100).toFixed(d)}%`);
+EV.sgn = (x, d = 1) => (x == null || !Number.isFinite(x) ? '—' : `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(x).toFixed(d)}%`);
+EV.evCls = x => (x == null ? 'ev-na' : x > 0.05 ? 'ev-pos' : x < -0.05 ? 'ev-neg' : 'ev-zero');
+EV.gbp = x => `£${Number(x).toFixed(2)}`;
+EV.f1 = x => (x == null || !Number.isFinite(x) ? '—' : Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : x.toFixed(1));
+const UK = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const UKD = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', weekday: 'short', day: 'numeric', month: 'short' });
+const UKT = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit' });
+const UKY = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' });
+EV.ymd = t => UKY.format(new Date(t));
+EV.fmtKO = t => UK.format(new Date(t)).replace(',', '');
+EV.fmtDay = t => UKD.format(new Date(t));
+EV.fmtTime = t => UKT.format(new Date(t));
+EV.dayWord = t => { const d = EV.ymd(t), n = EV.ymd(Date.now()), tm = EV.ymd(Date.now() + 864e5); return d === n ? 'Today' : d === tm ? 'Tomorrow' : EV.fmtDay(t); };
+EV.ago = t => { const m = Math.round((Date.now() - t) / 6e4); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ${m % 60} min ago`; };
+
+// ---------- local storage (wrapped: private browsing can refuse it)
+EV.load = (k, d) => { try { const v = localStorage.getItem('evhub.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+EV.save = (k, v) => { try { localStorage.setItem('evhub.' + k, JSON.stringify(v)); return true; } catch { return false; } };
+EV.sload = (k, d) => { try { const v = sessionStorage.getItem('evhub.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+EV.ssave = (k, v) => { try { sessionStorage.setItem('evhub.' + k, JSON.stringify(v)); } catch { /* this visit only */ } };
+
+/* The EV Hub — settings, Explorer filters, presets (kept in this browser only). */
+'use strict';
+(() => {
+const EV = window.EV;
+EV.ago = t => { const m = Math.max(0, Math.round((EV.NOW - t) / 6e4)); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ${m % 60} min ago`; };
+
+const DEF_SETTINGS = { oddsFmt: 'dec', myBooks: ['b365', 'pp', 'mgm', 'bfx'], basis: 'mine', commission: 5, kellyDiv: 10, bankroll: 100, cols: null, dashLeagues: [], dashBasis: 'mine' };
+EV.settings = { ...DEF_SETTINGS, ...EV.load('settings', {}) };
+EV.saveSettings = () => EV.save('settings', EV.settings);
+EV.resetSettings = () => { EV.settings = { ...DEF_SETTINGS }; EV.saveSettings(); };
+
+EV.COLS = [ // Explorer columns: [key, header, default visible]
+  ['fixture', 'Fixture & kick-off', true], ['league', 'League', true], ['market', 'Market', true], ['line', 'Line', true], ['hit', 'Hit rate', true], ['form', 'Recent form', true],
+  ['prob', 'Model prob.', true], ['fair', 'Fair odds', true], ['best', 'Best odds', true], ['book', 'Bookmaker', true], ['ev', 'EV %', true], ['bestAll', 'Best (all books)', false],
+  ['conf', 'Confidence', true], ['sample', 'Sample', true], ['score', 'Best Overall', false], ['updated', 'Last odds update', true], ['link', 'Bookmaker link', true], ['action', 'Details', true]];
+EV.visibleCols = () => { const c = EV.settings.cols; return EV.COLS.filter(([k, , d]) => k === 'prob' || (c ? c.includes(k) : d)).map(([k]) => k); }; // the model probability is always shown
+
+EV.SORTS = [['evDesc', 'Highest positive EV'], ['evAsc', 'Lowest EV'], ['pDesc', 'Highest model probability'], ['pAsc', 'Lowest model probability'], ['best', 'Best Overall (illustrative)'], ['hitDesc', 'Highest historical hit rate'], ['oddsDesc', 'Highest bookmaker odds'], ['ko', 'Earliest kick-off'], ['name', 'Player / team name']];
+EV.DEF_FILTERS = { tab: 'player', when: 'all', leagues: [], fixtures: [], q: '', markets: [], pMin: '', pMax: '', evMin: '', evMax: '', fairMin: '', fairMax: '', oddsMin: '', oddsMax: '',
+  hitMin: '', hitWin: 'l10', sampleMin: '', books: 'basis', bookList: [], evSign: 'all', venue: 'all', minsMin: '', confMin: 'any', priced: false, sort: 'best' };
+EV.filters = { ...EV.DEF_FILTERS, ...EV.load('filters', {}) };
+EV.saveFilters = () => EV.save('filters', EV.filters);
+EV.presets = () => EV.load('presets', []);
+EV.savePresets = a => EV.save('presets', a);
+/** The bookmaker ids whose prices count right now (Explorer). */
+EV.activeBooks = (f = EV.filters) => (f.books === 'custom' && f.bookList.length ? f.bookList : (f.books === 'all' || (f.books === 'basis' && EV.settings.basis === 'all')) ? EV.BOOKS.map(b => b.id) : EV.settings.myBooks.length ? EV.settings.myBooks : EV.BOOKS.map(b => b.id));
+EV.basisLabel = (f = EV.filters) => (f.books === 'custom' && f.bookList.length ? `${f.bookList.length} chosen bookmakers` : (f.books === 'all' || (f.books === 'basis' && EV.settings.basis === 'all')) ? 'all bookmakers' : 'my bookmakers');
+})();
+
+/* The EV Hub — shared UI pieces: chips, charts, the detail sheet, toasts. */
+'use strict';
+(() => {
+const EV = window.EV, esc = EV.esc;
+EV.leagueName = id => (EV.LEAGUES.find(l => l.id === id) || {}).name || id;
+EV.leagueBadge = id => `<span class="lg lg-${esc(id)}">${esc((EV.LEAGUES.find(l => l.id === id) || {}).short || id)}</span>`;
+EV.fxName = fx => `${EV.TEAM[fx.home].name} v ${EV.TEAM[fx.away].name}`;
+EV.demoTag = (txt = 'DEMO DATA — NOT LIVE ODDS') => `<span class="demotag">${esc(txt)}</span>`;
+EV.evHtml = (e, d = 1) => `<b class="${EV.evCls(e)}">${e == null ? 'EV n/a' : EV.sgn(e, d)}</b>`;
+EV.confHtml = c => (c ? `<span class="conf conf-${c.label.toLowerCase()}" title="Confidence score ${c.score} of 6">${c.label}</span>` : '—');
+EV.chips = (name, items, sel, multi = true) => `<div class="chips" data-chips="${esc(name)}" data-multi="${multi ? 1 : 0}">${items.map(([v, l]) => `<button type="button" class="chip${(multi ? sel.includes(v) : sel === v) ? ' on' : ''}" data-v="${esc(v)}" aria-pressed="${multi ? sel.includes(v) : sel === v}">${esc(l)}</button>`).join('')}</div>`;
+EV.seg = (name, items, cur) => `<div class="seg" data-seg="${esc(name)}" role="group">${items.map(([v, l]) => `<button type="button" data-v="${esc(v)}" class="${String(v) === String(cur) ? 'on' : ''}" aria-pressed="${String(v) === String(cur)}">${esc(l)}</button>`).join('')}</div>`;
+EV.formHtml = (vals, hits) => `<span class="form">${vals.map((v, i) => `<i class="${hits[i] ? 'fh' : 'fm'}" title="${hits[i] ? 'hit' : 'miss'}">${esc(String(v))}</i>`).join('')}</span>`;
+
+/** Bar chart: values (oldest first) against a line; missing values drawn as a gap (never as zero). */
+EV.barChart = (pts, line, opts = {}) => { const h = opts.h || 120, w = Math.max(240, pts.length * 28), vals = pts.map(p => p.v).filter(v => v != null), mx = Math.max(line != null ? line * 1.3 : 1, ...vals, 1), bw = w / Math.max(1, pts.length);
+  const y = v => h - 18 - (v / mx) * (h - 32);
+  const bars = pts.map((p, i) => { const x = i * bw + bw * 0.15, ww = bw * 0.7; if (p.v == null) return `<g><rect x="${x}" y="${h - 22}" width="${ww}" height="2" class="bmiss"/><text x="${x + ww / 2}" y="${h - 26}" class="blab">–</text><title>${esc(p.label)}: not recorded</title></g>`;
+    const hit = opts.hit ? opts.hit(p.v) : null; return `<g><rect x="${x}" y="${y(p.v)}" width="${ww}" height="${Math.max(1, h - 18 - y(p.v))}" rx="2" class="${hit == null ? 'bneu' : hit ? 'bhit' : 'bno'}"/><text x="${x + ww / 2}" y="${y(p.v) - 3}" class="blab">${esc(EV.f1(p.v))}</text><text x="${x + ww / 2}" y="${h - 5}" class="bax">${esc(p.short || '')}</text><title>${esc(p.label)}: ${esc(EV.f1(p.v))}</title></g>`; }).join('');
+  const ln = line != null ? `<line x1="0" x2="${w}" y1="${y(line)}" y2="${y(line)}" class="bline"/><text x="${w - 2}" y="${y(line) - 4}" class="bltxt" text-anchor="end">${esc(opts.lineLabel || String(line))}</text>` : '';
+  return `<div class="chartwrap"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(opts.aria || 'Match by match chart')}">${bars}${ln}</svg></div>`; };
+/** Small line of earlier prices. */
+EV.spark = (hist, w = 70, h = 22) => { if (!hist || hist.length < 2) return ''; const mn = Math.min(...hist), mx = Math.max(...hist), sp = mx - mn || 1, pts = hist.map((v, i) => `${((i / (hist.length - 1)) * (w - 2) + 1).toFixed(1)},${(h - 2 - ((v - mn) / sp) * (h - 4)).toFixed(1)}`).join(' ');
+  const up = hist[hist.length - 1] > hist[hist.length - 2], dn = hist[hist.length - 1] < hist[hist.length - 2];
+  return `<svg class="spark ${up ? 'up' : dn ? 'dn' : ''}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${pts}"/></svg>`; };
+EV.moveHtml = pr => { if (!pr.prev || pr.prev === pr.odds) return '<span class="mv">no change</span>'; const up = pr.odds > pr.prev; return `<span class="mv ${up ? 'mvup' : 'mvdn'}">${up ? '▲' : '▼'} from ${esc(EV.fmtOdds(pr.prev))}</span>`; };
+/** Probability bar (white): p with its 80% range. */
+EV.probBar = m => (m && m.ok ? `<div class="pbar" title="Model ${EV.pct(m.p)} (range ${EV.pct(m.pLo, 0)}–${EV.pct(m.pHi, 0)})"><i class="pr" style="left:${m.pLo * 100}%;width:${Math.max(0.5, (m.pHi - m.pLo) * 100)}%"></i><i class="pp" style="left:${m.p * 100}%"></i></div>` : '');
+
+EV.toast = (msg, kind = '') => { let t = EV.$('#toasts'); if (!t) { t = document.createElement('div'); t.id = 'toasts'; document.body.appendChild(t); } const d = document.createElement('div'); d.className = `toast ${kind}`; d.innerHTML = msg; t.appendChild(d); setTimeout(() => d.classList.add('out'), 3800); setTimeout(() => d.remove(), 4400); };
+
+/** A full-height sheet (phone) / side panel (desktop). Back closes it. */
+EV.sheet = (html, onClose) => { EV.closeSheet(true); const w = document.createElement('div'); w.className = 'sheetwrap'; w.innerHTML = `<div class="sheetbg" data-close></div><section class="sheet" role="dialog" aria-modal="true"><button type="button" class="sheetx" data-close aria-label="Close">✕</button><div class="sheetin">${html}</div></section>`;
+  document.body.appendChild(w); document.body.classList.add('noscroll'); EV._sheet = { w, onClose }; try { history.pushState({ evsheet: 1 }, ''); } catch { /* fine */ }
+  w.addEventListener('click', e => { if (e.target.closest('[data-close]')) { history.state && history.state.evsheet ? history.back() : EV.closeSheet(); } }); return w.querySelector('.sheetin'); };
+EV.closeSheet = quiet => { const s = EV._sheet; if (!s) return; s.w.remove(); document.body.classList.remove('noscroll'); EV._sheet = null; if (!quiet && s.onClose) s.onClose(); };
+addEventListener('popstate', () => { if (EV._sheet) EV.closeSheet(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && EV._sheet) { history.state && history.state.evsheet ? history.back() : EV.closeSheet(); } });
+
+// chips / segmented controls: one delegated handler per container, calling back with the new value(s)
+EV.bindChips = (root, onChange) => root.addEventListener('click', e => { const b = e.target.closest('[data-chips] .chip, [data-seg] button'); if (!b || !root.contains(b)) return;
+  const box = b.closest('[data-chips], [data-seg]'), name = box.dataset.chips || box.dataset.seg;
+  if (box.dataset.seg) { box.querySelectorAll('button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); onChange(name, b.dataset.v); return; }
+  const multi = box.dataset.multi === '1'; if (!multi) box.querySelectorAll('.chip').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); else { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); }
+  onChange(name, multi ? [...box.querySelectorAll('.chip.on')].map(x => x.dataset.v) : b.dataset.v); });
+
+/** Draw a page again on a fresh element, so its old event listeners go with the old element. */
+EV.rerender = (root, view) => { const fresh = root.cloneNode(false); root.replaceWith(fresh); view(fresh); return fresh; };
+// remembered scroll positions per page (restored when you come back)
+EV.scrollKey = () => location.hash || '#/';
+addEventListener('scroll', () => { if (!EV._sheet) EV.ssave('scroll:' + EV.scrollKey(), scrollY); }, { passive: true });
+EV.restoreScroll = () => { const y = EV.sload('scroll:' + EV.scrollKey(), 0); requestAnimationFrame(() => scrollTo(0, y)); };
+})();
+
+window.EV.buildData = function () {
+/* The EV Hub — DEMO DATA. A synthetic football world, generated the same way on every visit from a fixed seed.
+ * Fictional clubs and players in five real competition names; nothing here is real football history or real bookmaker prices.
+ * The generator keeps the "true" rates it used, so demo bookmaker prices and the demo model are internally consistent:
+ * history is drawn from the true rates; the model only sees the history; demo bookmakers price from the truth plus noise and margin. */
+'use strict';
+(() => {
+const EV = window.EV;
+const R = EV.rng(20261105);
+const pick = a => a[Math.floor(R() * a.length)];
+const logn = s => Math.exp(EV.normal(R) * s);
+
+EV.LEAGUES = [
+  { id: 'epl', name: 'Premier League', short: 'EPL', country: 'England', missing: [] },
+  { id: 'laliga', name: 'La Liga', short: 'LIGA', country: 'Spain', missing: [] },
+  { id: 'seriea', name: 'Serie A', short: 'SA', country: 'Italy', missing: [] },
+  { id: 'bundesliga', name: 'Bundesliga', short: 'BL', country: 'Germany', missing: [] },
+  { id: 'ligue1', name: 'Ligue 1', short: 'L1', country: 'France', missing: ['tacklesWon'] }, // demo of a statistic the source does not record
+];
+const CLUBS = {
+  epl: ['Ashford Rovers', 'Kingsbridge City', 'Northgate United', 'Redcliffe Town', 'Harbourside FC', 'Millbrook Athletic', 'Westvale Wanderers', 'Stonebury Albion'],
+  laliga: ['Real Montaña', 'Atlético Costa Dorada', 'CD Valdoro', 'UD Sierra Alta', 'CF Puerto Viejo', 'Deportivo Las Rocas', 'SD Campo Verde', 'Racing Arenal'],
+  seriea: ['AC Vallarossa', 'US Montefiore', 'Calcio Lagobello', 'SS Portonero', 'FC Torrealta', 'AS Collinverde', 'Virtus Mareblu', 'Sporting Fiumara'],
+  bundesliga: ['FC Rheinbrück', 'SV Waldheim', 'Borussia Eichental', 'VfB Sonnenfeld', 'TSV Bergau', '1. FC Mühlbach', 'Eintracht Seestadt', 'SC Nordhafen'],
+  ligue1: ['Olympique Belcastel', 'AS Montclair', 'FC Rivebleue', 'Stade Valmont', 'RC Pierrefeu', 'US Clairfontaine', 'SC Bellerive', 'OGC Lavandière'],
+};
+const NAMES = {
+  epl: [['Callum', 'Jamie', 'Owen', 'Reece', 'Tom', 'Harvey', 'Lewis', 'Connor', 'Ben', 'Kieran', 'Sam', 'Ethan', 'Joe', 'Ryan', 'Luke', 'Alfie'], ['Hartley', 'Pryce', 'Whitmore', 'Danson', 'Fellowes', 'Ashby', 'Corbett', 'Lindley', 'Marsh', 'Rowntree', 'Stanton', 'Thorne', 'Wade', 'Yeats', 'Bramwell', 'Coates', 'Elwood', 'Garside']],
+  laliga: [['Álvaro', 'Iker', 'Pablo', 'Sergio', 'Hugo', 'Marcos', 'Rubén', 'Adrián', 'Javi', 'Dani', 'Unai', 'Mario', 'Óscar', 'Raúl'], ['Ferrán', 'Olmedo', 'Castaño', 'Iriarte', 'Belmonte', 'Quesada', 'Valverde', 'Arriaga', 'Montes', 'Navarrete', 'Sáenz', 'Toledo', 'Urquiza', 'Zamora']],
+  seriea: [['Lorenzo', 'Matteo', 'Davide', 'Riccardo', 'Tommaso', 'Federico', 'Gabriele', 'Alessio', 'Simone', 'Marco', 'Nicolò', 'Luca'], ['Bellandi', 'Carraro', 'De Santis', 'Fabbri', 'Gentile', 'Lombardo', 'Marchetti', 'Orsini', 'Pellegrino', 'Rinaldi', 'Sartori', 'Testa', 'Vitale', 'Zanetti']],
+  bundesliga: [['Jonas', 'Lukas', 'Niklas', 'Felix', 'Leon', 'Tim', 'Moritz', 'Julian', 'Florian', 'Paul', 'Elias', 'Max'], ['Brandt', 'Eckert', 'Hoffner', 'Kessler', 'Lindemann', 'Maurer', 'Neubauer', 'Pfeiffer', 'Rothe', 'Seidel', 'Vogt', 'Winkler', 'Ziegler', 'Albrecht']],
+  ligue1: [['Hugo', 'Théo', 'Lucas', 'Enzo', 'Mathis', 'Nathan', 'Louis', 'Jules', 'Rayan', 'Maxime', 'Clément', 'Antoine'], ['Barbier', 'Chevalier', 'Delorme', 'Fournier', 'Garnier', 'Lacroix', 'Marchand', 'Perrin', 'Rousseau', 'Vasseur', 'Bonnet', 'Lemaire', 'Morel', 'Tessier']],
+};
+
+// ---------- statistics recorded for players (per 90 minutes, by position) and their spread (negative-binomial dispersion)
+EV.PSTATS = {
+  shots: { label: 'Shots', short: 'Shots', disp: 6, base: { GK: 0, DF: 0.55, MF: 1.25, FW: 2.6 }, lines: [1, 2, 3, 4, 5] },
+  sot: { label: 'Shots on target', short: 'SOT', disp: 6, base: { GK: 0, DF: 0.18, MF: 0.45, FW: 1.05 }, lines: [1, 2, 3] },
+  tackles: { label: 'Tackles', short: 'Tackles', disp: 8, base: { GK: 0, DF: 2.0, MF: 2.1, FW: 0.7 }, lines: [1, 2, 3, 4] },
+  tacklesWon: { label: 'Tackles won', short: 'Tkl won', disp: 8, base: { GK: 0, DF: 1.25, MF: 1.3, FW: 0.4 }, lines: [1, 2, 3] },
+  fouls: { label: 'Fouls committed', short: 'Fouls', disp: 10, base: { GK: 0.05, DF: 1.1, MF: 1.3, FW: 1.2 }, lines: [1, 2, 3] },
+  fouled: { label: 'Fouls drawn', short: 'Fouled', disp: 10, base: { GK: 0.1, DF: 0.8, MF: 1.4, FW: 1.6 }, lines: [1, 2, 3] },
+  passes: { label: 'Passes', short: 'Passes', disp: 30, base: { GK: 28, DF: 52, MF: 50, FW: 22 }, lines: [15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70] },
+  goals: { label: 'Goals', short: 'Goals', disp: Infinity, base: { GK: 0, DF: 0.05, MF: 0.14, FW: 0.42 }, lines: [1, 2] },
+  assists: { label: 'Assists', short: 'Assists', disp: Infinity, base: { GK: 0, DF: 0.06, MF: 0.16, FW: 0.17 }, lines: [1] },
+  cards: { label: 'Cards (booked)', short: 'Cards', disp: Infinity, base: { GK: 0.03, DF: 0.2, MF: 0.19, FW: 0.13 }, lines: [1] },
+  saves: { label: 'Goalkeeper saves', short: 'Saves', disp: 10, base: { GK: 3.0, DF: 0, MF: 0, FW: 0 }, lines: [1, 2, 3, 4, 5, 6] },
+};
+EV.PSTAT_KEYS = Object.keys(EV.PSTATS);
+EV.POS_NAME = { GK: 'Goalkeeper', DF: 'Defender', MF: 'Midfielder', FW: 'Forward' };
+
+// ---------- bookmakers. The first five are the bookmakers OddsAPI.dev lists as live (checked 5 Nov 2026 in its OpenAPI spec:
+// bet365, paddy-power, betmgm-uk, pinnacle, betfair-exchange); the last three are listed there as "coming soon".
+// Every price shown in Phase 1 is DEMO data, never these bookmakers' real odds.
+EV.BOOKS = [
+  { id: 'b365', slug: 'bet365', name: 'bet365', margin: 1.0, provider: 'live' },
+  { id: 'pp', slug: 'paddy-power', name: 'Paddy Power', margin: 1.1, provider: 'live' },
+  { id: 'mgm', slug: 'betmgm-uk', name: 'BetMGM UK', margin: 1.05, provider: 'live' },
+  { id: 'bfx', slug: 'betfair-exchange', name: 'Betfair Exchange', margin: 0.25, provider: 'live', exchange: true },
+  { id: 'pin', slug: 'pinnacle', name: 'Pinnacle', margin: 0.5, provider: 'live', note: 'Check that Pinnacle is available to you: it does not accept UK customers.' },
+  { id: 'wh', slug: null, name: 'William Hill', margin: 1.1, provider: 'soon' },
+  { id: 'lad', slug: null, name: 'Ladbrokes', margin: 1.15, provider: 'soon' },
+  { id: 'betfred', slug: null, name: 'Betfred', margin: 1.2, provider: 'soon' },
+];
+EV.BOOK = EV.byKey(EV.BOOKS, 'id');
+
+// ---------- time helpers: UK kick-off times built relative to "now", so Today / Tomorrow always work
+const ukOffsetMin = t => { const d = new Date(t), p = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(d);
+  const h = Number(p.find(x => x.type === 'hour').value), m = Number(p.find(x => x.type === 'minute').value); let diff = h * 60 + m - (d.getUTCHours() * 60 + d.getUTCMinutes()); if (diff > 720) diff -= 1440; if (diff < -720) diff += 1440; return diff; };
+const ukAt = (dayOffset, hh, mm) => { const [y, mo, d] = EV.ymd(Date.now() + dayOffset * 864e5).split('-').map(Number); const t = Date.UTC(y, mo - 1, d, hh, mm); return t - ukOffsetMin(t) * 6e4; };
+EV.NOW = Date.now();
+
+// ---------- the world
+const teams = [], players = [], matches = [], fixtures = [];
+for (const L of EV.LEAGUES) {
+  const used = new Set();
+  CLUBS[L.id].forEach((name, i) => {
+    const q = logn(0.18), id = `${L.id}-${i}`;
+    const T = { id, league: L.id, name, short: name.replace(/^(FC|AC|AS|US|SS|CD|UD|CF|SD|SV|VfB|TSV|SC|RC|OGC|1\. FC) /, '').split(' ')[0].slice(0, 3).toUpperCase() + (i % 10),
+      att: q * logn(0.1), def: (1 / q) * logn(0.1), shotStyle: logn(0.15), cornerStyle: logn(0.15), foulStyle: logn(0.12), cardStyle: logn(0.18), possession: logn(0.12) };
+    T.code = name.split(/\s+/).filter(w => !/^(FC|AC|AS|US|SS|CD|UD|CF|SD|SV|VfB|TSV|SC|RC|OGC|1\.)$/.test(w)).map(w => w[0]).join('').slice(0, 3).toUpperCase().padEnd(3, 'X');
+    teams.push(T);
+    const shape = [['GK', 2], ['DF', 6], ['MF', 6], ['FW', 4]];
+    let n = 0;
+    for (const [pos, c] of shape) for (let j = 0; j < c; j++) {
+      let nm; do { nm = `${pick(NAMES[L.id][0])} ${pick(NAMES[L.id][1])}`; } while (used.has(nm)); used.add(nm);
+      const starter = (pos === 'GK' && j === 0) || (pos === 'DF' && j < 4) || (pos === 'MF' && j < 4) || (pos === 'FW' && j < 2);
+      const P = { id: `${id}-p${n++}`, team: id, league: L.id, name: nm, pos, starter, num: n, rates: {}, durability: starter ? 0.88 + R() * 0.1 : 0.5 + R() * 0.3 };
+      const indiv = logn(0.35);
+      for (const k of EV.PSTAT_KEYS) { const b = EV.PSTATS[k].base[pos]; let f = indiv;
+        if (['shots', 'sot', 'goals'].includes(k)) f *= T.att * T.shotStyle ** 0.5; if (k === 'passes') f = logn(0.15) * T.possession; if (['fouls', 'cards'].includes(k)) f *= T.foulStyle * logn(0.25); if (k === 'fouled') f *= logn(0.3);
+        if (k === 'tackles' || k === 'tacklesWon') f = (k === 'tacklesWon' && P.rates.tackles != null ? 1 : logn(0.3));
+        P.rates[k] = b * f; }
+      if (P.rates.tackles != null) P.rates.tacklesWon = P.rates.tackles * (0.55 + R() * 0.15);
+      if (P.rates.shots) P.rates.sot = Math.min(P.rates.shots * 0.6, P.rates.sot);
+      players.push(P);
+    }
+  });
+}
+EV.TEAMS = teams; EV.TEAM = EV.byKey(teams, 'id'); EV.PLAYERS = players; EV.PLAYER = EV.byKey(players, 'id');
+EV.teamPlayers = tid => players.filter(p => p.team === tid);
+
+// round robin (circle method), three cycles: 21 rounds played, rounds 22-23 upcoming
+const rr = ids => { const a = ids.slice(), rounds = []; for (let r = 0; r < a.length - 1; r++) { const rd = []; for (let i = 0; i < a.length / 2; i++) { const h = a[i], w = a[a.length - 1 - i]; rd.push(r % 2 ? [w, h] : [h, w]); } rounds.push(rd); a.splice(1, 0, a.pop()); } return rounds; };
+const LEAGUE_AVG = { goalsH: 1.5, goalsA: 1.18, corners: 4.9, };
+const pickN = (arr, n) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, n); };
+
+function lineupMinutes(tid) { // who played and for how long (absent players get no row: missing, never zero)
+  const sq = EV.teamPlayers(tid), out = new Map(), st = [], bench = [];
+  for (const pos of ['GK', 'DF', 'MF', 'FW']) { const ps = sq.filter(p => p.pos === pos), need = { GK: 1, DF: 4, MF: 4, FW: 2 }[pos];
+    const avail = ps.filter(p => R() < (p.starter ? p.durability : 0.85)); avail.sort((a, b) => (b.starter - a.starter) || (R() - 0.5));
+    st.push(...avail.slice(0, need)); bench.push(...avail.slice(need)); }
+  const subsOff = pickN(st.filter(p => p.pos !== 'GK'), 3), subsOn = pickN(bench.filter(p => p.pos !== 'GK'), 3);
+  for (const p of st) out.set(p.id, 90);
+  subsOff.forEach((p, i) => { const m = 55 + Math.floor(R() * 32); out.set(p.id, m); if (subsOn[i]) out.set(subsOn[i].id, 90 - m); });
+  return out;
+}
+
+function playMatch(m) {
+  const H = EV.TEAM[m.home], A = EV.TEAM[m.away], L = EV.LEAGUES.find(x => x.id === H.league), stats = {};
+  const lamH = LEAGUE_AVG.goalsH * H.att * A.def, lamA = LEAGUE_AVG.goalsA * A.att * H.def;
+  const rows = [];
+  for (const [T, O, lam, home] of [[H, A, lamH, true], [A, H, lamA, false]]) {
+    const mins = lineupMinutes(T.id), sq = EV.teamPlayers(T.id).filter(p => mins.has(p.id));
+    const goals = EV.poisS(R, lam), share = sq.map(p => (p.rates.goals || 0.001) * mins.get(p.id)), shS = EV.sum(share);
+    const pg = new Map(sq.map(p => [p.id, 0])); for (let g = 0; g < goals; g++) { let u = R() * shS; for (let i = 0; i < sq.length; i++) { u -= share[i]; if (u <= 0) { pg.set(sq[i].id, pg.get(sq[i].id) + 1); break; } } }
+    const pa = new Map(sq.map(p => [p.id, 0])); for (const [scorer, n] of pg) for (let g = 0; g < n; g++) { if (R() > 0.72) continue; const c = sq.filter(p => p.id !== scorer), w = c.map(p => (p.rates.assists || 0.01) * mins.get(p.id)), s = EV.sum(w); let u = R() * s; for (let i = 0; i < c.length; i++) { u -= w[i]; if (u <= 0) { pa.set(c[i].id, pa.get(c[i].id) + 1); break; } } }
+    const oppShotF = O.def ** 0.6, hf = home ? 1.05 : 0.95;
+    for (const p of sq) { const min = mins.get(p.id), f = min / 90, st = {};
+      st.shots = EV.nbS(R, p.rates.shots * f * oppShotF * hf, 6); st.sot = Math.min(st.shots, EV.nbS(R, p.rates.sot * f * oppShotF * hf, 6));
+      st.goals = pg.get(p.id); st.sot = Math.max(st.sot, st.goals); st.shots = Math.max(st.shots, st.sot); st.assists = pa.get(p.id);
+      st.tackles = EV.nbS(R, p.rates.tackles * f * (home ? 0.97 : 1.03) * O.possession ** 0.5, 8); st.tacklesWon = Math.min(st.tackles, EV.nbS(R, p.rates.tacklesWon * f * O.possession ** 0.5, 8));
+      st.fouls = EV.nbS(R, p.rates.fouls * f, 10); st.fouled = EV.nbS(R, p.rates.fouled * f * O.foulStyle, 10);
+      st.passes = EV.nbS(R, p.rates.passes * f * (home ? 1.04 : 0.96) / O.possession ** 0.4, 30); st.cards = R() < 1 - Math.exp(-p.rates.cards * f * T.cardStyle) ? 1 : 0; st.saves = 0;
+      for (const k of L.missing) st[k] = null;
+      rows.push({ m, p, team: T.id, opp: O.id, home, min, st });
+    }
+    stats[home ? 'h' : 'a'] = { goals, corners: EV.nbS(R, LEAGUE_AVG.corners * T.cornerStyle * T.att ** 0.5 * (home ? 1.08 : 0.92), 9) };
+  }
+  // goalkeeper saves = shots on target faced minus goals conceded
+  for (const side of ['h', 'a']) { const tid = side === 'h' ? m.home : m.away, oppRows = rows.filter(r => r.team !== tid), gk = rows.find(r => r.team === tid && r.p.pos === 'GK' && r.min >= 45);
+    const sotF = EV.sum(oppRows.map(r => r.st.sot)), gF = EV.sum(oppRows.map(r => r.st.goals)); if (gk) gk.st.saves = Math.max(0, sotF - gF); }
+  if (m.noPasses) for (const r of rows) r.st.passes = null; // a match where the source sent no passing data
+  const tot = (tid, k) => { const v = rows.filter(r => r.team === tid).map(r => r.st[k]); return v.some(x => x == null) ? null : EV.sum(v); };
+  m.score = [stats.h.goals, stats.a.goals];
+  m.t = {}; for (const [side, tid] of [['h', m.home], ['a', m.away]]) m.t[side] = { goals: stats[side].goals, shots: tot(tid, 'shots'), sot: tot(tid, 'sot'), corners: m.noCorners ? null : stats[side].corners, cards: tot(tid, 'cards'), fouls: tot(tid, 'fouls') };
+  m.rows = rows.map(r => ({ pid: r.p.id, team: r.team, opp: r.opp, home: r.home, min: r.min, st: r.st }));
+}
+
+for (const L of EV.LEAGUES) {
+  const ids = teams.filter(t => t.league === L.id).map(t => t.id), base = rr(ids), rounds = [];
+  for (let c = 0; c < 4; c++) for (const rd of base) rounds.push(c % 2 ? rd.map(([h, a]) => [a, h]) : rd);
+  const noPass = new Set([3 + Math.floor(R() * 8), 12 + Math.floor(R() * 8)].map(String)), noCorn = String(5 + Math.floor(R() * 10));
+  rounds.slice(0, 21).forEach((rd, r) => rd.forEach(([h, a], i) => {
+    const day = -Math.round((21 - r) * 3.9) + (i % 2), /* about two rounds a week, so the 21 played rounds start in mid-August */ date = ukAt(day, [12, 15, 17, 20][i % 4], [30, 0, 30, 0][i % 4]);
+    const m = { id: `${L.id}-r${r + 1}-${i}`, league: L.id, round: r + 1, home: h, away: a, ko: date, noPasses: noPass.has(String(r)) && i === 0, noCorners: String(r) === noCorn && i === 1 };
+    playMatch(m); matches.push(m);
+  }));
+  // upcoming rounds 22 and 23
+  const nowH = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', hourCycle: 'h23' }).format(new Date()));
+  const todaySlots = [[12, 30], [15, 0], [17, 30], [19, 45], [20, 0]].filter(([h, mm]) => h * 60 + mm > nowH * 60 + 90);
+  rounds.slice(21, 23).forEach((rd, k) => rd.forEach(([h, a], i) => {
+    let ko; if (k === 0) { const s = i < 2 && todaySlots.length ? todaySlots[Math.min(i + EV.LEAGUES.indexOf(L) % 2, todaySlots.length - 1)] : null; ko = s ? ukAt(0, s[0], s[1]) : ukAt(1, [12, 15, 17, 20][i], [30, 0, 30, 0][i]); }
+    else ko = ukAt(3 + (i % 2) + (EV.LEAGUES.indexOf(L) % 2), [12, 15, 17, 20][i], [30, 0, 30, 0][i]);
+    fixtures.push({ id: `${L.id}-r${22 + k}-${i}`, league: L.id, round: 22 + k, home: h, away: a, ko });
+  }));
+}
+fixtures.sort((a, b) => a.ko - b.ko);
+EV.MATCHES = matches; EV.FIXTURES = fixtures; EV.FIXTURE = EV.byKey(fixtures, 'id'); EV.MATCH = EV.byKey(matches, 'id');
+
+// per player match log (newest first), per team results
+const plog = new Map(players.map(p => [p.id, []]));
+for (const m of matches) for (const r of m.rows) plog.get(r.pid).push({ mid: m.id, ko: m.ko, team: r.team, opp: r.opp, home: r.home, min: r.min, st: r.st });
+for (const p of players) { p.log = plog.get(p.id).sort((a, b) => b.ko - a.ko); }
+for (const t of teams) t.log = matches.filter(m => m.home === t.id || m.away === t.id).sort((a, b) => b.ko - a.ko).map(m => { const h = m.home === t.id, me = m.t[h ? 'h' : 'a'], op = m.t[h ? 'a' : 'h'];
+  return { mid: m.id, ko: m.ko, opp: h ? m.away : m.home, home: h, gf: me.goals, ga: op.goals, for: me, against: op }; });
+
+// injury news for the upcoming games (demo): a few doubts, one absentee per league
+for (const L of EV.LEAGUES) { const lp = players.filter(p => p.league === L.id && p.starter && p.pos !== 'GK'); pickN(lp, 3).forEach((p, i) => { p.status = i === 0 ? 'out' : 'doubtful'; p.statusNote = i === 0 ? 'Hamstring (demo)' : 'Late fitness test (demo)'; }); }
+})();
+
+/* The EV Hub — DEMO MODEL (illustrative, synthetic data). It is NOT trained on real football history and has not been backtested.
+ * Player counts: a recency-weighted rate per 90 minutes, shrunk towards the position average, x expected minutes, x the opponent's
+ * concession factor (shrunk halfway to average), x a small home/away factor, then a negative-binomial distribution for P(X >= k).
+ * Team / match: attack and defence ratings from results (shrunk) -> Poisson goals matrix; shots, corners, cards and fouls use
+ * negative-binomial counts from team-for x opponent-against rates. Uncertainty = the same calculation at the 80% range of the rate.
+ * Missing statistics are left out of every average and hit rate (never counted as zero). */
+'use strict';
+(() => {
+const EV = window.EV;
+const W = 0.93, K90 = 3, Z = 1.2816; // recency weight per match, prior strength (90s), 80% interval
+const cache = new Map();
+const LG = {}; // league averages per position (rate per 90) and per team match
+for (const L of EV.LEAGUES) {
+  const ps = EV.PLAYERS.filter(p => p.league === L.id); LG[L.id] = { pos: {}, team: {} };
+  for (const pos of ['GK', 'DF', 'MF', 'FW']) { LG[L.id].pos[pos] = {};
+    for (const k of EV.PSTAT_KEYS) { let x = 0, m = 0; for (const p of ps) if (p.pos === pos) for (const r of p.log) if (r.min > 0 && r.st[k] != null) { x += r.st[k]; m += r.min; } LG[L.id].pos[pos][k] = m ? (x / m) * 90 : null; } }
+  const ms = EV.MATCHES.filter(m => m.league === L.id);
+  for (const k of ['goals', 'shots', 'sot', 'corners', 'cards', 'fouls']) { const v = ms.flatMap(m => [m.t.h[k], m.t.a[k]]).filter(x => x != null); LG[L.id].team[k] = EV.mean(v); }
+  LG[L.id].goalsH = EV.mean(ms.map(m => m.t.h.goals)); LG[L.id].goalsA = EV.mean(ms.map(m => m.t.a.goals));
+}
+EV.LG = LG;
+
+// opponent concessions: what a team allows to players of a position, per 90 of that position's minutes, relative to the league
+const CONC = new Map();
+const CAGG = new Map(); // one pass over every player row: what each team allowed to each position
+for (const mt of EV.MATCHES) { const seen = new Set(); for (const r of mt.rows) { if (!(r.min > 0)) continue; const pos = EV.PLAYER[r.pid].pos;
+  for (const k of EV.PSTAT_KEYS) { if (r.st[k] == null) continue; const key = `${r.opp}|${pos}|${k}`; let a = CAGG.get(key); if (!a) CAGG.set(key, (a = { x: 0, m: 0, n: 0 })); a.x += r.st[k]; a.m += r.min; if (!seen.has(key)) { seen.add(key); a.n++; } } } }
+EV.concession = (tid, pos, k) => {
+  const key = `${tid}|${pos}|${k}`; if (CONC.has(key)) return CONC.get(key);
+  const T = EV.TEAM[tid], a = CAGG.get(key) || { x: 0, m: 0, n: 0 }, lg = LG[T.league].pos[pos][k], raw = a.m && lg ? ((a.x / a.m) * 90) / lg : 1, f = 1 + 0.5 * (raw - 1);
+  const out = { factor: Number.isFinite(f) ? f : 1, raw, per90: a.m ? (a.x / a.m) * 90 : null, lg, n: a.n }; CONC.set(key, out); return out;
+};
+
+const ATT = new Set(['shots', 'sot', 'goals', 'assists', 'passes', 'fouled']);
+const homeF = (k, home) => (k === 'saves' ? (home ? 0.96 : 1.05) : ATT.has(k) ? (home ? 1.04 : 0.96) : 1);
+const probAt = (k, mean, line) => { const S = EV.PSTATS[k]; if (k === 'cards') return line <= 1 ? 1 - Math.exp(-mean) : 0; const pmf = EV.pmfArr(mean, S.disp, Math.max(line + 30, Math.ceil(mean * 3) + 10)); return EV.atLeast(pmf, line); };
+EV.probAt = probAt;
+
+/** Expected minutes for the next game: average of recent appearances, cut for a doubt; null when he is out. */
+EV.expMinutes = p => { if (p.status === 'out') return null; const app = p.log.filter(r => r.min > 0).slice(0, 6); if (!app.length) return 0;
+  const recent = p.log.slice(0, 6), played = recent.filter(r => r.min > 0).length / Math.max(1, recent.length), avg = EV.mean(app.map(r => r.min));
+  let e = avg * (0.35 + 0.65 * played); if (p.status === 'doubtful') e *= 0.6; return Math.round(e); };
+
+/** Player model: P(stat >= line) in fixture fx. */
+const baseCache = new Map();
+function playerBase(pid, k, fxId) { // everything that does not depend on the line, worked out once
+  const key = `${pid}|${k}|${fxId}`; if (baseCache.has(key)) return baseCache.get(key);
+  const p = EV.PLAYER[pid], fx = EV.FIXTURE[fxId], home = fx.home === p.team, opp = home ? fx.away : fx.home, L = EV.LEAGUES.find(x => x.id === p.league);
+  const rows = p.log.filter(r => r.min > 0), valid = rows.filter(r => r.st[k] != null), missing = rows.length - valid.length;
+  const b = { pid, k, fx: fxId, home, oppId: opp, n: valid.length, apps: rows.length, missing, notRecorded: L.missing.includes(k), values: valid, vals: valid.map(r => r.st[k]) };
+  if (b.notRecorded || !valid.length) { b.ok = false; b.reason = b.notRecorded ? `${EV.PSTATS[k].label} is not recorded for ${L.name} in the demo source` : 'No recorded matches'; baseCache.set(key, b); return b; }
+  let sx = 0, sm = 0; valid.forEach((r, i) => { const w = W ** i; sx += w * r.st[k]; sm += (w * r.min) / 90; });
+  const prior = LG[p.league].pos[p.pos][k] ?? 0, rate = (sx + prior * K90) / (sm + K90), se = Math.sqrt(Math.max(rate, 0.02) / (sm + K90)) * Math.sqrt(1 + rate / (EV.PSTATS[k].disp || 1e9));
+  const em = EV.expMinutes(p), c = EV.concession(opp, p.pos, k), hf = homeF(k, home), m = em == null ? 0 : (em / 90) * c.factor * hf;
+  Object.assign(b, { ok: em != null && em > 0, rate, se, prior, expMin: em, opp: c, homeF: hf, mean: rate * m, meanLo: Math.max(0, rate - Z * se) * m, meanHi: (rate + Z * se) * m, stable: minutesStable(p), doubt: p.status === 'doubtful' });
+  if (!b.ok) b.reason = em == null ? `${p.name} is out (demo injury news)` : 'Not expected to play';
+  else if (k !== 'cards') { const S = EV.PSTATS[k], mx = Math.ceil(b.meanHi * 3) + 15; b.pmf = EV.pmfArr(b.mean, S.disp, mx); b.pmfLo = EV.pmfArr(b.meanLo, S.disp, mx); b.pmfHi = EV.pmfArr(b.meanHi, S.disp, mx); }
+  baseCache.set(key, b); return b;
+}
+const pAt = (b, which, line) => { const mean = which === 'lo' ? b.meanLo : which === 'hi' ? b.meanHi : b.mean; if (b.k === 'cards') return line <= 1 ? 1 - Math.exp(-mean) : 0;
+  const arr = which === 'lo' ? b.pmfLo : which === 'hi' ? b.pmfHi : b.pmf; return line >= arr.length ? 0 : EV.atLeast(arr, line); };
+/** Player model: P(stat >= line) in fixture fx. */
+EV.playerModel = (pid, k, fxId, line) => {
+  const key = `p|${pid}|${k}|${fxId}|${line}`; if (cache.has(key)) return cache.get(key);
+  const b = playerBase(pid, k, fxId), res = { pid, k, fx: fxId, line, ok: b.ok, reason: b.reason, notRecorded: b.notRecorded, n: b.n, apps: b.apps, missing: b.missing, home: b.home, expMin: b.expMin, mean: b.mean, rate: b.rate, opp: b.opp, base: b };
+  if (!b.ok) { cache.set(key, res); return res; }
+  res.p = pAt(b, '', line); res.pLo = pAt(b, 'lo', line); res.pHi = pAt(b, 'hi', line);
+  const hr = n => { const v = b.vals.slice(0, n); return v.length ? { pct: v.filter(x => x >= line).length / v.length, n: v.length } : null; };
+  res.hit = { l5: hr(5), l10: hr(10), l20: hr(20), all: hr(b.vals.length) }; res.form = b.vals.slice(0, 5);
+  res.conf = confidence({ n: b.n, width: res.pHi - res.pLo, stable: b.stable, missingShare: b.missing / Math.max(1, b.apps), doubt: b.doubt || b.expMin < 45 /* a substitute's minutes are unpredictable */ });
+  cache.set(key, res); return res;
+};
+const minutesStable = p => { const m = p.log.slice(0, 8).map(r => r.min || 0); const a = EV.mean(m); if (!a) return false; const sd = Math.sqrt(EV.mean(m.map(x => (x - a) ** 2))); return sd / a < 0.3; };
+function confidence(o) { let s = 0; s += o.n >= 15 ? 2 : o.n >= 8 ? 1 : 0; s += o.width < 0.12 ? 2 : o.width < 0.2 ? 1 : 0; s += o.stable ? 1 : 0; s += o.missingShare <= 0.1 ? 1 : 0; s -= o.doubt ? 2 : 0;
+  return { score: s, label: s >= 5 ? 'High' : s >= 3 ? 'Medium' : 'Low' }; }
+EV.confidence = confidence;
+
+// ---------- team and match markets
+EV.TSTATS = { goals: { label: 'Goals', disp: Infinity }, shots: { label: 'Shots', disp: 12 }, sot: { label: 'Shots on target', disp: 9 }, corners: { label: 'Corners', disp: 9 }, cards: { label: 'Cards', disp: 6 }, fouls: { label: 'Fouls', disp: 20 } };
+/** A team's expected count of stat k against opponent in this fixture, with its uncertainty. */
+EV.teamMean = (tid, oid, home, k) => {
+  const T = EV.TEAM[tid], O = EV.TEAM[oid], lg = LG[T.league].team[k], fv = T.log.map(r => r.for[k]).filter(x => x != null), av = O.log.map(r => r.against[k]).filter(x => x != null), K = 4;
+  const fr = (EV.sum(fv) + lg * K) / (fv.length + K), ar = (EV.sum(av) + lg * K) / (av.length + K), hf = k === 'goals' ? (home ? LG[T.league].goalsH / lg : LG[T.league].goalsA / lg) : home ? 1.04 : 0.96;
+  const mean = (fr * ar / lg) * hf, se = mean * Math.sqrt(1 / (fv.length + K) / Math.max(fr, 0.3) + 1 / (av.length + K) / Math.max(ar, 0.3));
+  return { mean, se, forRate: fr, againstRate: ar, lg, nFor: fv.length, nAg: av.length };
+};
+const scoreMatrix = (lh, la) => { const M = []; for (let i = 0; i <= 10; i++) { M[i] = []; for (let j = 0; j <= 10; j++) M[i][j] = EV.poisPmf(i, lh) * EV.poisPmf(j, la); } return M; };
+const msum = (M, f) => { let s = 0; for (let i = 0; i <= 10; i++) for (let j = 0; j <= 10; j++) if (f(i, j)) s += M[i][j]; return s; };
+
+// market catalogue: cat 'team' (one team) or 'match' (the whole match)
+EV.TMARKETS = {
+  result: { cat: 'match', label: 'Match result', stat: 'goals', outcomes: ['home', 'draw', 'away'] },
+  dc: { cat: 'match', label: 'Double chance', stat: 'goals', outcomes: ['1X', 'X2', '12'] },
+  dnb: { cat: 'match', label: 'Draw no bet', stat: 'goals', outcomes: ['home', 'away'] },
+  mgoals: { cat: 'match', label: 'Match goals', stat: 'goals', lines: [0.5, 1.5, 2.5, 3.5, 4.5], ou: true },
+  btts: { cat: 'match', label: 'Both teams to score', stat: 'goals', outcomes: ['yes', 'no'] },
+  mshots: { cat: 'match', label: 'Match shots', stat: 'shots', lines: [18.5, 20.5, 22.5, 24.5, 26.5, 28.5], ou: true },
+  msot: { cat: 'match', label: 'Match shots on target', stat: 'sot', lines: [5.5, 6.5, 7.5, 8.5, 9.5, 10.5], ou: true },
+  mcorners: { cat: 'match', label: 'Match corners', stat: 'corners', lines: [7.5, 8.5, 9.5, 10.5, 11.5], ou: true },
+  mcards: { cat: 'match', label: 'Match cards', stat: 'cards', lines: [2.5, 3.5, 4.5, 5.5], ou: true },
+  mfouls: { cat: 'match', label: 'Match fouls', stat: 'fouls', lines: [18.5, 20.5, 22.5, 24.5, 26.5], ou: true },
+  tgoals: { cat: 'team', label: 'Team goals', stat: 'goals', lines: [0.5, 1.5, 2.5], ou: true },
+  tshots: { cat: 'team', label: 'Team shots', stat: 'shots', lines: [8.5, 10.5, 12.5, 14.5, 16.5], ou: true },
+  tsot: { cat: 'team', label: 'Team shots on target', stat: 'sot', lines: [2.5, 3.5, 4.5, 5.5], ou: true },
+  tcorners: { cat: 'team', label: 'Team corners', stat: 'corners', lines: [2.5, 3.5, 4.5, 5.5, 6.5], ou: true },
+  tcards: { cat: 'team', label: 'Team cards', stat: 'cards', lines: [0.5, 1.5, 2.5, 3.5], ou: true },
+  tfouls: { cat: 'team', label: 'Team fouls', stat: 'fouls', lines: [8.5, 10.5, 12.5, 14.5], ou: true },
+  hcap: { cat: 'team', label: 'Handicap', stat: 'goals', lines: [-1.5, 1.5], ou: false },
+};
+const OUTNAME = { home: 'Home win', draw: 'Draw', away: 'Away win', '1X': 'Home or draw', X2: 'Draw or away', 12: 'Home or away', yes: 'Yes', no: 'No' };
+EV.outcomeName = (mk, o, fx) => { const H = EV.TEAM[fx.home].name, A = EV.TEAM[fx.away].name;
+  if (mk === 'result' || mk === 'dnb') return o === 'home' ? H : o === 'away' ? A : 'Draw'; if (mk === 'dc') return o === '1X' ? `${H} or draw` : o === 'X2' ? `Draw or ${A}` : `${H} or ${A}`; return OUTNAME[o] || o; };
+
+/** Probability of a team / match selection given the two teams' expected counts (also used by the demo bookmakers' "true" prices). */
+const distCache = new Map();
+EV.teamCalc = (sel, fx, lh0, la0) => { const M = EV.TMARKETS[sel.mk], k = M.stat, lh = Math.max(0.05, lh0), la = Math.max(0.05, la0), dk = `${fx.id}|${k}|${lh.toFixed(5)}|${la.toFixed(5)}`;
+  if (k === 'goals') { let S = distCache.get(dk); if (!S) { S = scoreMatrix(lh, la); distCache.set(dk, S); } const pH = msum(S, (i, j) => i > j), pD = msum(S, (i, j) => i === j), pA = 1 - pH - pD;
+    if (sel.mk === 'result') return { p: { home: pH, draw: pD, away: pA }[sel.side], push: 0 };
+    if (sel.mk === 'dc') return { p: { '1X': pH + pD, X2: pD + pA, 12: pH + pA }[sel.side], push: 0 };
+    if (sel.mk === 'dnb') return { p: sel.side === 'home' ? pH : pA, push: pD };
+    if (sel.mk === 'btts') { const y = msum(S, (i, j) => i > 0 && j > 0); return { p: sel.side === 'yes' ? y : 1 - y, push: 0 }; }
+    if (sel.mk === 'mgoals') { const o = msum(S, (i, j) => i + j > sel.line); return { p: sel.side === 'over' ? o : 1 - o, push: 0 }; }
+    const mine = sel.team === fx.home;
+    if (sel.mk === 'tgoals') { const o = msum(S, (i, j) => (mine ? i : j) > sel.line); return { p: sel.side === 'over' ? o : 1 - o, push: 0 }; }
+    if (sel.mk === 'hcap') return { p: msum(S, (i, j) => (mine ? i - j : j - i) + sel.line > 0), push: 0 }; }
+  let D = distCache.get(dk); if (!D) { const S = EV.TSTATS[k], mx = Math.ceil((lh + la) * 2.2) + 15, ph = EV.pmfArr(lh, S.disp, mx), pa = EV.pmfArr(la, S.disp, mx); D = { ph, pa, both: EV.conv(ph, pa) }; distCache.set(dk, D); }
+  const arr = M.cat === 'match' ? D.both : sel.team === fx.home ? D.ph : D.pa, o = EV.atLeast(arr, Math.floor(sel.line) + 1);
+  return { p: sel.side === 'over' ? o : 1 - o, push: 0 }; };
+/** Team / match model. sel = { mk, fx, team (team markets), side ('over'|'under'|outcome), line }. Returns { p, pLo, pHi, push, ... }. */
+EV.teamModel = sel => {
+  const key = `t|${sel.mk}|${sel.fx}|${sel.team || ''}|${sel.side}|${sel.line ?? ''}`; if (cache.has(key)) return cache.get(key);
+  const fx = EV.FIXTURE[sel.fx], M = EV.TMARKETS[sel.mk], k = M.stat, H = EV.teamMean(fx.home, fx.away, true, k), A = EV.teamMean(fx.away, fx.home, false, k);
+  const calc = (dh, da) => EV.teamCalc(sel, fx, H.mean + dh, A.mean + da);
+  const calc0 = (dh, da) => { const lh = Math.max(0.05, H.mean + dh), la = Math.max(0.05, A.mean + da);
+    if (k === 'goals') { const S = scoreMatrix(lh, la), pH = msum(S, (i, j) => i > j), pD = msum(S, (i, j) => i === j), pA = 1 - pH - pD;
+      if (sel.mk === 'result') return { p: { home: pH, draw: pD, away: pA }[sel.side], push: 0 };
+      if (sel.mk === 'dc') return { p: { '1X': pH + pD, X2: pD + pA, 12: pH + pA }[sel.side], push: 0 };
+      if (sel.mk === 'dnb') return { p: sel.side === 'home' ? pH : pA, push: pD };
+      if (sel.mk === 'btts') { const y = msum(S, (i, j) => i > 0 && j > 0); return { p: sel.side === 'yes' ? y : 1 - y, push: 0 }; }
+      if (sel.mk === 'mgoals') { const o = msum(S, (i, j) => i + j > sel.line); return { p: sel.side === 'over' ? o : 1 - o, push: 0 }; }
+      const mine = sel.team === fx.home;
+      if (sel.mk === 'tgoals') { const o = msum(S, (i, j) => (mine ? i : j) > sel.line); return { p: sel.side === 'over' ? o : 1 - o, push: 0 }; }
+      if (sel.mk === 'hcap') return { p: msum(S, (i, j) => (mine ? i - j : j - i) + sel.line > 0), push: 0 }; }
+    const S = EV.TSTATS[k], ph = EV.pmfArr(lh, S.disp, 70), pa = EV.pmfArr(la, S.disp, 70), arr = M.cat === 'match' ? EV.conv(ph, pa) : sel.team === fx.home ? ph : pa, o = EV.atLeast(arr, Math.floor(sel.line) + 1);
+    return { p: sel.side === 'over' ? o : 1 - o, push: 0 }; };
+  const c = calc(0, 0), combos = [[-1, -1], [-1, 1], [1, -1], [1, 1]].map(([x, y]) => calc(x * Z * H.se, y * Z * A.se).p);
+  const res = { ...sel, ok: true, p: c.p, push: c.push, pLo: Math.min(c.p, ...combos), pHi: Math.max(c.p, ...combos), H, A, k, fxObj: fx };
+  // historical hit rate. Team markets: the team's own matches. Result markets: the home team's results for home outcomes, the away
+  // team's for away outcomes, both pooled for the draw. Totals: both teams' recent matches pooled. Missing statistics are skipped.
+  const Hl = EV.TEAM[fx.home].log, Al = EV.TEAM[fx.away].log, both = [...Hl, ...Al].sort((x, y) => y.ko - x.ko), res3 = r => Math.sign(r.gf - r.ga);
+  let src, hitOf, valOf = () => null;
+  if (sel.mk === 'result') { src = sel.side === 'home' ? Hl : sel.side === 'away' ? Al : both; hitOf = r => (sel.side === 'draw' ? res3(r) === 0 : res3(r) === 1); }
+  else if (sel.mk === 'dc') { src = sel.side === '1X' ? Hl : sel.side === 'X2' ? Al : both; hitOf = r => (sel.side === '12' ? res3(r) !== 0 : res3(r) >= 0); }
+  else if (sel.mk === 'dnb') { src = (sel.side === 'home' ? Hl : Al).filter(r => res3(r) !== 0); hitOf = r => res3(r) === 1; }
+  else if (sel.mk === 'btts') { src = both; hitOf = r => (r.gf > 0 && r.ga > 0) === (sel.side === 'yes'); }
+  else if (sel.mk === 'hcap') { src = sel.team === fx.home ? Hl : Al; valOf = r => r.gf - r.ga; hitOf = r => r.gf - r.ga + sel.line > 0; }
+  else { src = M.cat === 'team' ? (sel.team === fx.home ? Hl : Al) : both; valOf = r => { const f = r.for[k], a = r.against[k]; return M.cat === 'team' ? f : f == null || a == null ? null : f + a; };
+    hitOf = r => { const v = valOf(r); return v == null ? null : sel.side === 'over' ? v > sel.line : v < sel.line; }; }
+  const hv = src.map(r => ({ r, h: hitOf(r), v: valOf(r) })).filter(x => x.h != null).map(x => ({ ...x, h: x.h ? 1 : 0 }));
+  const hr = n => { const v = hv.slice(0, n); return v.length ? { pct: EV.mean(v.map(x => x.h)), n: v.length } : null; };
+  res.hit = { l5: hr(5), l10: hr(10), l20: hr(20), all: hr(hv.length) }; res.form = hv.slice(0, 5).map(x => (x.v != null ? x.v : x.h ? 'W' : '–')); res.formHit = hv.slice(0, 5).map(x => x.h);
+  res.n = M.cat === 'team' ? Math.min(H.nFor, A.nAg) : Math.min(H.nFor, A.nFor); res.values = hv;
+  res.conf = confidence({ n: res.n, width: res.pHi - res.pLo, stable: true, missingShare: 0, doubt: false });
+  cache.set(key, res); return res;
+};
+EV.clearModelCache = () => cache.clear();
+})();
+
+/* The EV Hub — the opportunity list and DEMO bookmaker prices.
+ * Every row is one selection (player / team / match, market, line, side) with the demo model's probability. Demo bookmakers price
+ * each selection from the demo model's probability moved by a market-wide difference, plus their own noise and margin, rounded down to the usual fractional
+ * ladder; not every bookmaker offers every market or line, and some prices are stale. Links: none are verified in Phase 1. */
+'use strict';
+(() => {
+const EV = window.EV;
+const logit = p => Math.log(p / (1 - p)), sig = x => 1 / (1 + Math.exp(-x));
+// How often each demo bookmaker offers a market (per fixture / player). Player-prop coverage follows what OddsAPI.dev publishes
+// (oddsapi.dev/markets/player-props, 5 Nov 2026): bet365 has the deepest set; BetMGM UK prices shots and shots on target; Paddy Power
+// and BetMGM UK price goalscorers. Tackles won and fouls totals are not in OddsAPI.dev's market list, so no demo bookmaker prices them.
+const ALLB = { b365: 1, pp: 0.95, mgm: 0.9, bfx: 0.85, pin: 0.95, wh: 0.9, lad: 0.85, betfred: 0.8 };
+const COVER = {
+  shots: { b365: 0.95, mgm: 0.8 }, sot: { b365: 0.92, mgm: 0.8, pp: 0.7, bfx: 0.45 }, tackles: { b365: 0.8 }, tacklesWon: {}, fouls: { b365: 0.8 }, fouled: { b365: 0.75 }, passes: { b365: 0.65 },
+  goals: { b365: 0.98, pp: 0.95, mgm: 0.9, bfx: 0.55, wh: 0.85, lad: 0.8, betfred: 0.75 }, assists: { b365: 0.8, pp: 0.45, mgm: 0.45 }, cards: { b365: 0.9, pp: 0.6, wh: 0.5 }, saves: { b365: 0.8 },
+  result: ALLB, dc: { ...ALLB, bfx: 0.4 }, dnb: { ...ALLB, bfx: 0.3 }, mgoals: ALLB, btts: { ...ALLB, pin: 0.6 },
+  mshots: { b365: 0.7, mgm: 0.45 }, msot: { b365: 0.7, mgm: 0.45 }, mcorners: { b365: 0.92, pp: 0.8, mgm: 0.7, pin: 0.5, bfx: 0.3, wh: 0.7, lad: 0.6, betfred: 0.5 },
+  mcards: { b365: 0.9, pp: 0.75, mgm: 0.6, wh: 0.6, lad: 0.5, betfred: 0.45 }, mfouls: {},
+  tgoals: { b365: 0.9, pp: 0.7, mgm: 0.6, pin: 0.8, wh: 0.6, lad: 0.5 }, tshots: { b365: 0.5 }, tsot: { b365: 0.5 }, tcorners: { b365: 0.75, pp: 0.5, mgm: 0.4, pin: 0.3 },
+  tcards: { b365: 0.6, pp: 0.4 }, tfouls: {}, hcap: { pin: 1, b365: 0.9, bfx: 0.6, pp: 0.6, mgm: 0.5, wh: 0.5 } };
+const MARGIN = { player: 0.08, team: 0.06, match: 0.045 };
+EV.STALE_MIN = 30; // a price older than this is never treated as bettable
+
+// The demo "market view" of a selection: the demo model's probability moved by a market-wide difference (shared by every bookmaker and
+// mirrored for the opposite side of the same line), then each bookmaker adds its own noise and margin.
+const marketP = (pModel, mktKey, flip) => { const d = EV.normal(EV.rng(EV.hash(mktKey))) * 0.1; return sig(logit(EV.clamp(pModel, 0.01, 0.99)) + (flip ? -d : d)); };
+const LIDX = new Map(EV.LADDER.map((x, i) => [x.dec.toFixed(4), i])), ladderIdx = d => LIDX.get(d.toFixed(4)) ?? 0;
+/** Earlier prices of one demo quote, oldest first, ending at its previous and current price (for the small movement chart). */
+EV.priceHist = (rowId, pr) => { const R = EV.rng(EV.hash(rowId + '|hist|' + pr.bk)), h = [pr.odds, pr.prev]; let j = ladderIdx(pr.prev); for (let i = 0; i < 5; i++) { const mv = R(); j = EV.clamp(j + (mv < 0.2 ? 1 : mv > 0.8 ? -1 : 0), 0, EV.LADDER.length - 1); h.push(EV.LADDER[j].dec); } return h.reverse(); };
+function offers(rowId, group, p, cat, rnd) { // demo prices: [{ bk, odds, prev, hist, at, link }]
+  const out = []; if (!(p > 0.035 && p < 0.97)) return out;
+  for (const B of EV.BOOKS) { const R = EV.rng(EV.hash(rowId + '|' + B.id)), cv = (COVER[group] || {})[B.id] || 0; if (R() > cv) continue;
+    const q = sig(logit(p) + EV.normal(R) * 0.05), implied = Math.min(0.985, q * (1 + MARGIN[cat] * B.margin * (0.8 + R() * 0.4))), odds = EV.snapDown(1 / implied); if (odds < 1.02) continue;
+    const mv = R(), idx = ladderIdx(odds), prev = EV.LADDER[EV.clamp(idx + (mv < 0.2 ? 1 : mv > 0.8 ? -1 : 0), 0, EV.LADDER.length - 1)].dec;
+    const ageMin = R() < 0.1 ? 40 + R() * 150 : 1 + R() * 24;
+    out.push({ bk: B.id, odds, prev, at: EV.NOW - ageMin * 6e4, link: null, eventUrl: null }); void rnd; }
+  return out; }
+
+const rows = [];
+const push = r => { rows.push(r); return r; };
+for (const fx of EV.FIXTURES) {
+  const lg = fx.league;
+  // ---- player markets
+  for (const tid of [fx.home, fx.away]) for (const p of EV.teamPlayers(tid)) {
+    const em = EV.expMinutes(p); if (em == null || em < 25) continue;
+    for (const k of EV.PSTAT_KEYS) {
+      if (k === 'saves' ? p.pos !== 'GK' : p.pos === 'GK') continue;
+      const S = EV.PSTATS[k], cands = S.lines.map(line => ({ line, m: EV.playerModel(p.id, k, fx.id, line) }));
+      if (cands[0].m.notRecorded) { push({ id: `${fx.id}|${p.id}|${k}|${S.lines[0]}`, cat: 'player', fx: fx.id, league: lg, ko: fx.ko, team: tid, home: fx.home === tid, pid: p.id, subject: p.name, mk: k, mkLabel: S.label, line: S.lines[0], side: 'over', m: cands[0].m, prices: [] }); continue; }
+      const ok = cands.filter(c => c.m.ok && c.m.p > 0.07 && c.m.p < 0.94); const use = ok.slice().sort((a, b) => Math.abs(a.m.p - 0.5) - Math.abs(b.m.p - 0.5)).slice(0, 3).sort((a, b) => a.line - b.line);
+      for (const { line, m } of use) { const id = `${fx.id}|${p.id}|${k}|${line}`, pt = marketP(m.p, id, false);
+        push({ id, cat: 'player', fx: fx.id, league: lg, ko: fx.ko, team: tid, home: fx.home === tid, pid: p.id, subject: p.name, pos: p.pos, mk: k, mkLabel: S.label, line, side: 'over', m, prices: offers(id, k, pt, 'player') }); }
+    }
+  }
+  // ---- team and match markets
+  const H = EV.TEAM[fx.home], A = EV.TEAM[fx.away];
+  for (const [mk, M] of Object.entries(EV.TMARKETS)) {
+    const sels = []; const teamsOf = M.cat === 'team' ? [fx.home, fx.away] : [null];
+    for (const team of teamsOf) { if (M.outcomes) for (const side of M.outcomes) sels.push({ mk, fx: fx.id, team, side, line: null });
+      else for (const line of M.lines) for (const side of M.ou ? ['over', 'under'] : ['win']) sels.push({ mk, fx: fx.id, team, side, line }); }
+    for (const sel of sels) { const m = EV.teamModel(sel); if (!(m.p > 0.06 && m.p < 0.94)) continue;
+      const id = `${fx.id}|${mk}|${sel.team || 'm'}|${sel.side}|${sel.line ?? ''}`, flip = sel.side === 'under' || sel.side === 'no', pc = m.push ? m.p / (1 - m.push) : m.p /* draw no bet: priced on the chance of winning given no draw */, pt = M.ou || mk === 'btts' ? marketP(pc, `${fx.id}|${mk}|${sel.team || 'm'}|${sel.line ?? ''}`, flip) : marketP(pc, id, false);
+      const subject = M.cat === 'team' ? EV.TEAM[sel.team].name : `${H.name} v ${A.name}`;
+      push({ id, cat: M.cat, fx: fx.id, league: lg, ko: fx.ko, team: sel.team, home: sel.team ? sel.team === fx.home : null, subject, mk, mkLabel: M.label, line: sel.line, side: sel.side, m, prices: offers(id, mk, pt, M.cat) }); }
+  }
+}
+EV.ROWS = rows; EV.ROW = EV.byKey(rows, 'id'); EV.ROWS_BY_FX = new Map(); for (const r of rows) { if (!EV.ROWS_BY_FX.has(r.fx)) EV.ROWS_BY_FX.set(r.fx, []); EV.ROWS_BY_FX.get(r.fx).push(r); }
+
+/** The words for a selection: e.g. "2+ shots", "Over 2.5", "Ashford Rovers −1.5". */
+EV.selText = r => { const fx = EV.FIXTURE[r.fx];
+  if (r.cat === 'player') return r.mk === 'cards' ? 'To be booked' : r.mk === 'goals' && r.line === 1 ? 'Anytime goalscorer' : `${r.line}+ ${EV.PSTATS[r.mk].short.toLowerCase()}`;
+  if (r.mk === 'hcap') return `${r.line > 0 ? '+' : '−'}${Math.abs(r.line)} goals`;
+  if (r.line != null) return `${r.side === 'over' ? 'Over' : 'Under'} ${r.line}`;
+  return EV.outcomeName(r.mk, r.side, fx); };
+/** Odds used for EV: on an exchange, winnings are reduced by its commission (Settings; 5% by default). */
+EV.effOdds = pr => { const B = EV.BOOK[pr.bk]; return B && B.exchange ? 1 + (pr.odds - 1) * (1 - (EV.settings ? EV.settings.commission : 5) / 100) : pr.odds; };
+EV.isFresh = pr => (EV.NOW - pr.at) / 6e4 <= EV.STALE_MIN;
+/** Best fresh price among the given bookmakers (ids); stale prices are never used. */
+EV.bestPrice = (r, books) => { let best = null, n = 0; for (const pr of r.prices) { if (books && !books.includes(pr.bk)) continue; if (!EV.isFresh(pr)) continue; n++; if (!best || EV.effOdds(pr) > EV.effOdds(best)) best = pr; } return { best, n }; };
+/** EV of a row at decimal odds O, allowing for a push (draw no bet: stake back on a draw). */
+EV.rowEv = (m, O) => (m && m.ok && O > 1 ? (m.p * O + (m.push || 0) - 1) * 100 : null);
+EV.rowFair = m => (m && m.ok && m.p >= 0.001 ? (1 - (m.push || 0)) / m.p : null); // below 0.1% there is no meaningful fair price
+
+/** Best Overall (ILLUSTRATIVE DEMO SCORE, documented in the app and MODEL-AND-SCORING.md). Only for selections with positive EV at the price:
+ *  cautious EV = (halfway between the model probability and the low end of its 80% range) x odds + push - 1, then x reliability:
+ *  sample n/(n+6) x confidence (High 1, Medium 0.8, Low 0.55) x freshness (<=15 min 1, else 0.9) x liquidity sqrt(min(1, books/3)) x long odds (sqrt(3/odds) above 3.0).
+ *  Selections with zero or negative EV get no score (listed after the scored ones, by EV). */
+EV.scoreOf = (m, pr, nBooks) => { if (!m || !m.ok || !pr) return null; const O = EV.effOdds(pr), push = m.push || 0; if (!(m.p * O + push - 1 > 0)) return null;
+  const pC = (m.p + m.pLo) / 2, evC = pC * O + push - 1;
+  const rel = (m.n / (m.n + 6)) * ({ High: 1, Medium: 0.8, Low: 0.55 }[m.conf.label]) * ((EV.NOW - pr.at) / 6e4 <= 15 ? 1 : 0.9) * Math.sqrt(Math.min(1, nBooks / 3)) * (O > 3 ? Math.sqrt(3 / O) : 1);
+  return 100 * evC * (evC > 0 ? rel : 1); };
+})();
+
+};
+/* The EV Hub — EV Explorer: every selection with the demo model's probability, fair odds, the best demo price and EV. */
+'use strict';
+(() => {
+const EV = window.EV, esc = EV.esc;
+const PAGE = 50;
+let shown = PAGE, lastList = [];
+
+const pctIn = v => (EV.num(v) == null ? null : EV.num(v) / 100);
+/** Apply every filter and the sort. Returns [{ r, best, nBooks, bestAll, ev, fair, score }]. */
+EV.explorerRows = (f = EV.filters) => {
+  const books = EV.activeBooks(f), today = EV.ymd(EV.NOW), tomorrow = EV.ymd(EV.NOW + 864e5), q = f.q.trim().toLowerCase();
+  const pMin = pctIn(f.pMin), pMax = pctIn(f.pMax), evMin = EV.num(f.evMin), evMax = EV.num(f.evMax), fairMin = EV.num(f.fairMin), fairMax = EV.num(f.fairMax), oMin = EV.num(f.oddsMin), oMax = EV.num(f.oddsMax);
+  const hitMin = pctIn(f.hitMin), sMin = EV.num(f.sampleMin), mMin = EV.num(f.minsMin), confRank = { any: 0, Low: 1, Medium: 2, High: 3 }, cMin = confRank[f.confMin] || 0;
+  const out = [];
+  for (const r of EV.ROWS) {
+    if (f.tab !== 'all' && r.cat !== f.tab) continue;
+    if (f.when !== 'all') { const d = EV.ymd(r.ko); if ((f.when === 'today' && d !== today) || (f.when === 'tomorrow' && d !== tomorrow)) continue; }
+    if (f.leagues.length && !f.leagues.includes(r.league)) continue;
+    if (f.fixtures.length && !f.fixtures.includes(r.fx)) continue;
+    if (f.markets.length && !f.markets.includes(r.mk)) continue;
+    if (f.venue !== 'all' && (r.home == null || r.home !== (f.venue === 'home'))) continue;
+    if (q) { const fx = EV.FIXTURE[r.fx], hay = `${r.subject} ${EV.TEAM[fx.home].name} ${EV.TEAM[fx.away].name} ${r.mkLabel}`.toLowerCase(); if (!hay.includes(q)) continue; }
+    const m = r.m;
+    if (mMin != null && r.cat === 'player' && !(m.expMin >= mMin)) continue;
+    if ((pMin != null && !(m.ok && m.p >= pMin)) || (pMax != null && !(m.ok && m.p <= pMax))) continue;
+    const fair = EV.rowFair(m); if ((fairMin != null && !(fair >= fairMin)) || (fairMax != null && !(fair <= fairMax))) continue;
+    if (hitMin != null) { const h = m.hit && m.hit[f.hitWin]; if (!h || h.pct < hitMin) continue; }
+    if (sMin != null && !(m.n >= sMin)) continue;
+    if (cMin && !(m.conf && confRank[m.conf.label] >= cMin)) continue;
+    const { best, n } = EV.bestPrice(r, books);
+    if (f.priced && !best) continue;
+    if ((oMin != null && !(best && best.odds >= oMin)) || (oMax != null && !(best && best.odds <= oMax))) continue;
+    const ev = best ? EV.rowEv(m, EV.effOdds(best)) : null;
+    if ((evMin != null && !(ev != null && ev >= evMin)) || (evMax != null && !(ev != null && ev <= evMax))) continue;
+    if (f.evSign === 'pos' && !(ev > 0)) continue; if (f.evSign === 'neg' && !(ev != null && ev < 0)) continue;
+    out.push({ r, best, nBooks: n, ev, fair, score: best ? EV.scoreOf(m, best, n) : null });
+  }
+  const nul = (a, b, f2, dir) => { const x = f2(a), y = f2(b); if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return dir * (x - y); };
+  const S = { evDesc: (a, b) => nul(a, b, x => x.ev, -1), evAsc: (a, b) => nul(a, b, x => x.ev, 1), pDesc: (a, b) => nul(a, b, x => (x.r.m.ok ? x.r.m.p : null), -1), pAsc: (a, b) => nul(a, b, x => (x.r.m.ok ? x.r.m.p : null), 1),
+    best: (a, b) => nul(a, b, x => x.score, -1) || (a.score == null && b.score == null ? nul(a, b, x => x.ev, -1) : 0), hitDesc: (a, b) => nul(a, b, x => x.r.m.hit && x.r.m.hit[f.hitWin] ? x.r.m.hit[f.hitWin].pct : null, -1), oddsDesc: (a, b) => nul(a, b, x => (x.best ? x.best.odds : null), -1),
+    ko: (a, b) => a.r.ko - b.r.ko || a.r.subject.localeCompare(b.r.subject), name: (a, b) => a.r.subject.localeCompare(b.r.subject) || a.r.ko - b.r.ko }[f.sort] || ((a, b) => 0);
+  out.sort((a, b) => S(a, b) || a.r.id.localeCompare(b.r.id));
+  return out;
+};
+
+const fxShort = fx => `${EV.TEAM[fx.home].name} v ${EV.TEAM[fx.away].name}`;
+const hitCell = (m, win) => { const h = m.hit && m.hit[win]; return h ? `<b>${Math.round(h.pct * 100)}%</b> <small>${h.n}</small>` : '—'; };
+const formCell = r => { const m = r.m; if (!m.ok && !m.form) return '—'; if (r.cat === 'player') return EV.formHtml((m.form || []).slice().reverse(), (m.form || []).slice().reverse().map(v => v >= r.line)); return EV.formHtml((m.form || []).slice().reverse(), (m.formHit || []).slice().reverse()); };
+EV.lineText = r => (r.cat === 'player' ? `${r.line}+ (over ${r.line - 0.5})` : r.mk === 'hcap' ? `${r.line > 0 ? '+' : '−'}${Math.abs(r.line)}` : r.line != null ? `${r.side === 'over' ? 'Over' : 'Under'} ${r.line}` : EV.outcomeName(r.mk, r.side, EV.FIXTURE[r.fx]));
+
+function rowHtml(x, cols, f) {
+  const { r, best, ev, fair } = x, m = r.m, fx = EV.FIXTURE[r.fx], B = best ? EV.BOOK[best.bk] : null, anyStale = !best && r.prices.length;
+  const cell = {
+    fixture: `<td class="cfx"><span>${esc(fxShort(fx))}</span><small>${esc(EV.dayWord(fx.ko))} ${esc(EV.fmtTime(fx.ko))}</small></td>`,
+    league: `<td>${EV.leagueBadge(r.league)}</td>`,
+    market: `<td>${esc(r.mkLabel)}</td>`,
+    line: `<td class="nw">${esc(EV.lineText(r))}</td>`,
+    hit: `<td class="n">${m.ok || m.hit ? hitCell(m, f.hitWin) : '—'}</td>`,
+    form: `<td>${formCell(r)}</td>`,
+    prob: `<td class="n">${m.ok ? `<b>${EV.pct(m.p)}</b>` : `<span class="muted xs">${esc(m.notRecorded ? 'Not recorded' : 'Unavailable')}</span>`}</td>`,
+    fair: `<td class="n">${fair ? esc(EV.fmtOdds(fair)) : '—'}</td>`,
+    best: `<td class="n">${best ? `<b>${esc(EV.fmtOdds(best.odds))}</b>` : `<span class="muted xs">${anyStale ? 'Stale prices only' : 'No price available'}</span>`}</td>`,
+    book: `<td>${B ? esc(B.name) : '—'}</td>`,
+    ev: `<td class="n">${best ? EV.evHtml(ev) : '<span class="muted">—</span>'}</td>`,
+    bestAll: `<td class="n">${(() => { const a = EV.bestPrice(r, null).best; return a ? `${esc(EV.fmtOdds(a.odds))} <small>${esc(EV.BOOK[a.bk].name)}</small>` : '—'; })()}</td>`,
+    conf: `<td>${m.ok ? EV.confHtml(m.conf) : '—'}</td>`,
+    sample: `<td class="n">${m.n != null ? m.n : '—'}</td>`,
+    score: `<td class="n">${x.score == null ? '—' : x.score.toFixed(1)}</td>`,
+    updated: `<td class="nw">${best ? esc(EV.ago(best.at)) : r.prices.length ? `<span class="muted">${esc(EV.ago(Math.max(...r.prices.map(p => p.at))))} (stale)</span>` : '—'}</td>`,
+    link: `<td><button type="button" class="btn sm" disabled title="No verified bookmaker link in demo data">No link</button></td>`,
+    action: `<td><button type="button" class="btn sm acc" data-detail="${esc(r.id)}">Details</button></td>`,
+  };
+  return `<tr data-detail="${esc(r.id)}" tabindex="0"><th class="sel" scope="row"><b>${esc(r.subject)}</b><small>${esc(r.cat === 'player' ? `${EV.selText(r)} · ${EV.TEAM[r.team].name}` : r.cat === 'team' ? `${r.mkLabel}: ${EV.selText(r)}` : `${r.mkLabel}: ${EV.selText(r)}`)}</small></th>${cols.map(c => cell[c]).join('')}</tr>`;
+}
+
+function resultsHtml() {
+  const f = EV.filters, list = EV.explorerRows(f), cols = EV.visibleCols(), pos = list.filter(x => x.ev > 0).length; lastList = list;
+  const head = `<tr><th class="sel" scope="col">${f.tab === 'player' ? 'Player & selection' : f.tab === 'all' ? 'Selection' : f.tab === 'team' ? 'Team & selection' : 'Match & selection'}</th>${cols.map(c => `<th scope="col"${['hit', 'prob', 'fair', 'best', 'ev', 'sample', 'score', 'bestAll'].includes(c) ? ' class="n"' : ''}>${esc(EV.COLS.find(x => x[0] === c)[1])}${c === 'hit' ? ` <small>(${f.hitWin.toUpperCase()})</small>` : ''}</th>`).join('')}</tr>`;
+  return `<div class="reshead"><p><b>${list.length.toLocaleString('en-GB')}</b> selections · <b class="ev-pos">${pos.toLocaleString('en-GB')}</b> positive EV at ${esc(EV.basisLabel())}${EV.$('#demo') ? '' : ''}</p>${EV.demoTag()}</div>
+    ${list.length ? `<div class="tblwrap" id="extbl"><table class="tbl">${head}${list.slice(0, shown).map(x => rowHtml(x, cols, f)).join('')}</table></div>${list.length > shown ? `<button type="button" class="btn wide" data-more>Show ${Math.min(PAGE, list.length - shown)} more (${(list.length - shown).toLocaleString('en-GB')} left)</button>` : ''}`
+      : '<div class="empty"><b>No selections match these filters.</b><p>Widen a range, untick a league or reset the filters.</p><button type="button" class="btn" data-reset>Reset filters</button></div>'}`;
+}
+
+const mkGroups = () => ({ player: EV.PSTAT_KEYS.map(k => [k, EV.PSTATS[k].label]), team: Object.entries(EV.TMARKETS).filter(([, M]) => M.cat === 'team').map(([k, M]) => [k, M.label]), match: Object.entries(EV.TMARKETS).filter(([, M]) => M.cat === 'match').map(([k, M]) => [k, M.label]) });
+function filtersHtml() {
+  const f = EV.filters, G = mkGroups(), mks = f.tab === 'all' ? [...G.player, ...G.team, ...G.match] : G[f.tab];
+  const fxs = EV.FIXTURES.filter(fx => !f.leagues.length || f.leagues.includes(fx.league)), presets = EV.presets();
+  const rng = (lab, a, b, unit = '', hint = '') => `<div class="fr"><span class="flab">${esc(lab)}</span><div class="rng"><input class="in" inputmode="decimal" data-f="${a}" value="${esc(f[a])}" placeholder="min${unit}" aria-label="${esc(lab)} minimum"><span>to</span><input class="in" inputmode="decimal" data-f="${b}" value="${esc(f[b])}" placeholder="max${unit}" aria-label="${esc(lab)} maximum"></div>${hint ? `<small class="muted">${esc(hint)}</small>` : ''}</div>`;
+  return `<div class="fgrid">
+    <div class="fr wide"><span class="flab">When</span>${EV.seg('when', [['all', 'Upcoming'], ['today', 'Today'], ['tomorrow', 'Tomorrow']], f.when)}</div>
+    <div class="fr wide"><span class="flab">Leagues</span>${EV.chips('leagues', EV.LEAGUES.map(l => [l.id, l.name]), f.leagues)}<small class="muted">None ticked = every league</small></div>
+    <div class="fr wide"><span class="flab">Fixtures <small data-fxcount>(${f.fixtures.length ? `${f.fixtures.length} chosen` : 'all'})</small></span><div class="fxbox">${fxs.map(fx => `<label class="ck"><input type="checkbox" data-fx value="${esc(fx.id)}"${f.fixtures.includes(fx.id) ? ' checked' : ''}><span>${esc(fxShort(fx))} <small>${esc(EV.dayWord(fx.ko))} ${esc(EV.fmtTime(fx.ko))}</small></span></label>`).join('')}</div><button type="button" class="linkbtn" data-clearfx${f.fixtures.length ? '' : ' hidden'}>Clear fixtures</button></div>
+    <div class="fr wide"><span class="flab">Markets</span>${EV.chips('markets', mks, f.markets)}</div>
+    ${rng('Model probability (%)', 'pMin', 'pMax', '%')}${rng('EV (%)', 'evMin', 'evMax', '%')}${rng('Fair odds (decimal)', 'fairMin', 'fairMax')}${rng('Bookmaker odds (decimal)', 'oddsMin', 'oddsMax')}
+    <div class="fr"><span class="flab">Minimum hit rate (%)</span><div class="rng"><input class="in" inputmode="decimal" data-f="hitMin" value="${esc(f.hitMin)}" placeholder="e.g. 60" aria-label="Minimum hit rate">${EV.seg('hitWin', [['l5', 'L5'], ['l10', 'L10'], ['l20', 'L20'], ['all', 'All']], f.hitWin)}</div></div>
+    <div class="fr"><span class="flab">Minimum sample (matches)</span><input class="in" inputmode="numeric" data-f="sampleMin" value="${esc(f.sampleMin)}" placeholder="e.g. 10"></div>
+    <div class="fr"><span class="flab">Minimum expected minutes <small>(players)</small></span><input class="in" inputmode="numeric" data-f="minsMin" value="${esc(f.minsMin)}" placeholder="e.g. 60"></div>
+    <div class="fr"><span class="flab">Minimum confidence</span>${EV.seg('confMin', [['any', 'Any'], ['Medium', 'Medium+'], ['High', 'High']], f.confMin)}</div>
+    <div class="fr"><span class="flab">EV</span>${EV.seg('evSign', [['all', 'All'], ['pos', 'Positive only'], ['neg', 'Negative only']], f.evSign)}</div>
+    <div class="fr"><span class="flab">Home / away</span>${EV.seg('venue', [['all', 'Both'], ['home', 'Home'], ['away', 'Away']], f.venue)}</div>
+    <div class="fr wide"><span class="flab">Bookmakers whose prices count</span>${EV.seg('books', [['basis', 'Default (Settings)'], ['mine', 'My bookmakers'], ['all', 'All'], ['custom', 'Choose']], f.books)}
+      ${f.books === 'custom' ? EV.chips('bookList', EV.BOOKS.map(b => [b.id, b.name]), f.bookList) : ''}<small class="muted">Stale prices (older than ${EV.STALE_MIN} min) never count as bettable.</small></div>
+    <div class="fr"><label class="ck"><input type="checkbox" data-fck="priced"${f.priced ? ' checked' : ''}><span>Only selections with a current price</span></label></div>
+    <div class="fr wide presets"><span class="flab">Saved filter presets <small>(this browser)</small></span><div class="rng"><input class="in" data-presetname placeholder="Name, e.g. Shots EV+" maxlength="40"><button type="button" class="btn sm acc" data-presetsave>Save</button></div>
+      ${presets.length ? `<div class="plist">${presets.map((p, i) => `<span class="pitem"><button type="button" class="chip" data-presetload="${i}">${esc(p.name)}</button><button type="button" class="linkbtn" data-presetdel="${i}" aria-label="Delete preset ${esc(p.name)}">✕</button></span>`).join('')}</div>` : '<small class="muted">No presets yet.</small>'}</div>
+    <div class="fr wide"><button type="button" class="btn" data-reset>Reset all filters</button></div></div>`;
+}
+
+EV.viewExplorer = root => {
+  const f = EV.filters, open = EV.load('filtersOpen', false);
+  root.innerHTML = `<header class="phead"><h1>EV Explorer</h1><p class="muted">Every demo selection with the model's probability, fair odds, the best demo price and EV. Tap a row for the full analysis.</p></header>
+    <nav class="tabs" role="tablist">${[['player', 'Player Markets'], ['team', 'Team Markets'], ['match', 'Match Markets'], ['all', 'All Markets']].map(([k, l]) => `<button type="button" role="tab" class="tab${f.tab === k ? ' on' : ''}" data-tab="${k}" aria-selected="${f.tab === k}">${l}</button>`).join('')}</nav>
+    <div class="toolbar"><input class="in search" type="search" data-f="q" value="${esc(f.q)}" placeholder="Search player, team or market" aria-label="Search">
+      <label class="sortl"><span class="xs muted">Sort</span><select class="in" data-sort>${EV.SORTS.map(([k, l]) => `<option value="${k}"${f.sort === k ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
+      <div class="tbtns"><button type="button" class="btn${open ? ' on' : ''}" data-ftoggle aria-expanded="${open}">Filters${activeCount() ? ` <span class="badge">${activeCount()}</span>` : ''}</button><button type="button" class="btn" data-colbtn aria-expanded="false">Columns</button><button type="button" class="btn ghost" data-scoredoc>How Best Overall works</button></div></div>
+    <div class="colpanel" id="colpanel" hidden>${EV.COLS.map(([k, l]) => `<label class="ck"><input type="checkbox" data-col="${k}"${EV.visibleCols().includes(k) ? ' checked' : ''}${k === 'prob' ? ' disabled' : ''}><span>${esc(l)}${k === 'prob' ? ' (always shown)' : ''}</span></label>`).join('')}<small class="muted">The player / team column and the model probability always stay visible.</small></div>
+    <section class="fpanel" id="fpanel"${open ? '' : ' hidden'}>${filtersHtml()}</section>
+    <div class="basisrow"><span class="xs muted">Prices from</span>${EV.seg('basisQuick', [['mine', `My bookmakers (${EV.settings.myBooks.length})`], ['all', 'All bookmakers']], EV.settings.basis)}</div>
+    <div id="exres">${resultsHtml()}</div>`;
+  const res = root.querySelector('#exres'), fp = root.querySelector('#fpanel');
+  const refresh = (keepPage = false) => { if (!keepPage) shown = PAGE; const tw = res.querySelector('#extbl'), sl = tw ? tw.scrollLeft : 0; res.innerHTML = resultsHtml(); const t2 = res.querySelector('#extbl'); if (t2) t2.scrollLeft = sl; EV.saveFilters(); updBadge(); };
+  const updBadge = () => { const b = root.querySelector('[data-ftoggle]'); b.innerHTML = `Filters${activeCount() ? ` <span class="badge">${activeCount()}</span>` : ''}`; };
+  const redrawFilters = () => { const y = fp.querySelector('.fxbox') ? fp.querySelector('.fxbox').scrollTop : 0; fp.innerHTML = filtersHtml(); const b = fp.querySelector('.fxbox'); if (b) b.scrollTop = y; };
+  let tm = null;
+  root.addEventListener('input', e => { const t = e.target; if (t.dataset.f) { f[t.dataset.f] = t.value; clearTimeout(tm); tm = setTimeout(() => refresh(), t.dataset.f === 'q' ? 180 : 250); } });
+  root.addEventListener('change', e => { const t = e.target;
+    if (t.matches('[data-sort]')) { f.sort = t.value; refresh(); }
+    if (t.matches('[data-fx]')) { f.fixtures = [...fp.querySelectorAll('[data-fx]:checked')].map(x => x.value); const c = fp.querySelector('[data-fxcount]'); if (c) c.textContent = `(${f.fixtures.length ? `${f.fixtures.length} chosen` : 'all'})`; const cb = fp.querySelector('[data-clearfx]'); if (cb) cb.hidden = !f.fixtures.length; refresh(); }
+    if (t.matches('[data-fck]')) { f[t.dataset.fck] = t.checked; refresh(); }
+    if (t.matches('[data-col]')) { EV.settings.cols = [...root.querySelectorAll('[data-col]:checked')].map(x => x.dataset.col).concat('prob'); EV.saveSettings(); refresh(true); } });
+  EV.bindChips(root, (name, v) => {
+    if (name === 'basisQuick') { EV.settings.basis = v; EV.saveSettings(); if (f.books !== 'basis') f.books = 'basis'; redrawFilters(); refresh(); return; }
+    if (name === 'books') { f.books = v; redrawFilters(); refresh(); return; }
+    if (name === 'leagues') { f.leagues = v; f.fixtures = f.fixtures.filter(id => !v.length || v.includes(EV.FIXTURE[id].league)); redrawFilters(); refresh(); return; }
+    f[name] = v; refresh(); });
+  root.addEventListener('click', e => { const t = e.target;
+    const tb = t.closest('[data-tab]'); if (tb) { f.tab = tb.dataset.tab; f.markets = []; root.querySelectorAll('[data-tab]').forEach(x => { x.classList.toggle('on', x === tb); x.setAttribute('aria-selected', x === tb); }); redrawFilters(); refresh(); return; }
+    if (t.closest('[data-ftoggle]')) { const o = fp.hidden; fp.hidden = !o; EV.save('filtersOpen', o); t.closest('[data-ftoggle]').classList.toggle('on', o); t.closest('[data-ftoggle]').setAttribute('aria-expanded', o); return; }
+    if (t.closest('[data-colbtn]')) { const p = root.querySelector('#colpanel'); p.hidden = !p.hidden; t.closest('[data-colbtn]').setAttribute('aria-expanded', !p.hidden); return; }
+    if (t.closest('[data-scoredoc]')) { EV.scoreDoc(); return; }
+    if (t.closest('[data-more]')) { shown += PAGE; refresh(true); return; }
+    if (t.closest('[data-reset]')) { Object.assign(f, { ...EV.DEF_FILTERS, tab: f.tab, sort: f.sort }); EV.saveFilters(); EV.rerender(root, EV.viewExplorer); return; }
+    if (t.closest('[data-clearfx]')) { f.fixtures = []; redrawFilters(); refresh(); return; }
+    if (t.closest('[data-presetsave]')) { const n = fp.querySelector('[data-presetname]').value.trim(); if (!n) { EV.toast('Type a name for the preset first.'); return; } const a = EV.presets().filter(p => p.name !== n); a.push({ name: n, f: { ...f } }); EV.savePresets(a); redrawFilters(); EV.toast(`Preset “${esc(n)}” saved in this browser.`); return; }
+    const pl = t.closest('[data-presetload]'); if (pl) { const p = EV.presets()[Number(pl.dataset.presetload)]; if (p) { Object.assign(f, { ...EV.DEF_FILTERS, ...p.f }); EV.saveFilters(); EV.rerender(root, EV.viewExplorer); EV.toast(`Preset “${esc(p.name)}” loaded.`); } return; }
+    const pd = t.closest('[data-presetdel]'); if (pd) { const a = EV.presets(); a.splice(Number(pd.dataset.presetdel), 1); EV.savePresets(a); redrawFilters(); return; }
+    const d = t.closest('[data-detail]'); if (d) { EV.openDetail(d.dataset.detail); } });
+  root.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('tr[data-detail]')) EV.openDetail(e.target.dataset.detail); });
+};
+function activeCount() { const f = EV.filters, D = EV.DEF_FILTERS; return ['when', 'q', 'pMin', 'pMax', 'evMin', 'evMax', 'fairMin', 'fairMax', 'oddsMin', 'oddsMax', 'hitMin', 'sampleMin', 'minsMin', 'evSign', 'venue', 'confMin', 'priced'].filter(k => f[k] !== D[k]).length + (f.leagues.length ? 1 : 0) + (f.fixtures.length ? 1 : 0) + (f.markets.length ? 1 : 0) + (f.books !== 'basis' ? 1 : 0); }
+/** Open the Explorer with some filters set (from other pages). */
+EV.openExplorer = patch => { Object.assign(EV.filters, { ...EV.DEF_FILTERS, sort: EV.filters.sort, ...patch }); EV.saveFilters(); EV.ssave('scroll:#/explorer', 0); if (location.hash === '#/explorer') EV.route(); else location.hash = '#/explorer'; };
+EV.scoreDoc = () => EV.sheet(`<h2>How “Best Overall” works <span class="demotag">ILLUSTRATIVE DEMO SCORE</span></h2>
+  <p>Best Overall ranks positive-EV selections by an edge that has been made deliberately cautious. It is not a prediction of profit and, in Demo Mode, it is calculated from synthetic data.</p>
+  <ol class="doc"><li><b>Only positive EV is scored.</b> A selection whose EV at the price is zero or negative gets no score; those are listed after the scored ones, ordered by EV.</li>
+  <li><b>Cautious EV</b>: instead of the model's central probability it uses a figure halfway to the <b>low end of the model's 80% range</b>: (p + pLow) ÷ 2 × odds + push − 1. An edge that disappears when the model is a little pessimistic scores low or negative.</li>
+  <li><b>Sample size</b>: × n ÷ (n + 6), so a handful of matches counts for little.</li><li><b>Confidence</b> (sample, width of the probability range, minutes stability, missing data, injury doubts): High × 1, Medium × 0.8, Low × 0.55.</li>
+  <li><b>Freshness</b>: a price older than 15 minutes × 0.9. Prices older than ${EV.STALE_MIN} minutes are never used at all.</li><li><b>Liquidity</b> (proxy): √(min(1, bookmakers pricing it ÷ 3)). Real liquidity is unknown in Phase 1.</li>
+  <li><b>Long odds</b>: above 3.00 × √(3 ÷ odds): long prices are where a model is least reliable.</li></ol>
+  <p class="muted">With a real, backtested model, measured calibration would replace the confidence weights here.</p>`);
+EV.lastExplorerList = () => lastList;
+})();
+
+/* The EV Hub — detailed analysis of one selection (opens from any row). Lines can be changed; prices follow the line. */
+'use strict';
+(() => {
+const EV = window.EV, esc = EV.esc;
+
+function modelFor(r, line, side) { return r.cat === 'player' ? EV.playerModel(r.pid, r.mk, r.fx, line) : EV.teamModel({ mk: r.mk, fx: r.fx, team: r.team, side, line }); }
+function rowFor(r, line, side) { const id = r.cat === 'player' ? `${r.fx}|${r.pid}|${r.mk}|${line}` : `${r.fx}|${r.mk}|${r.team || 'm'}|${side}|${line ?? ''}`; return EV.ROW[id] || null; }
+function linesFor(r) { if (r.cat === 'player') return EV.PSTATS[r.mk].lines; const M = EV.TMARKETS[r.mk]; return M.lines || null; }
+
+EV.openDetail = id => { const r0 = EV.ROW[id]; if (!r0) return; const st = { line: r0.line, side: r0.side, book: null, kdiv: EV.settings.kellyDiv, bank: EV.settings.bankroll };
+  const box = EV.sheet('<div id="dt"></div>'), el = box.querySelector('#dt');
+  const draw = () => { el.innerHTML = html(r0, st); };
+  el.addEventListener('click', e => { const b = e.target.closest('[data-dline]'); if (b) { st.line = Number(b.dataset.dline); st.book = null; draw(); return; }
+    const s = e.target.closest('[data-dside]'); if (s) { st.side = s.dataset.dside; st.book = null; draw(); return; }
+    const k = e.target.closest('[data-kdiv]'); if (k) { st.kdiv = Number(k.dataset.kdiv); draw(); return; }
+    const bk = e.target.closest('[data-dbook]'); if (bk) { st.book = bk.dataset.dbook; draw(); return; }
+    const pl = e.target.closest('[data-goplayer]'); if (pl) { EV.closeSheet(); location.hash = `#/player/${pl.dataset.goplayer}`; return; }
+    const tm = e.target.closest('[data-goteam]'); if (tm) { EV.closeSheet(); location.hash = `#/team/${tm.dataset.goteam}`; return; }
+    const fx = e.target.closest('[data-gofx]'); if (fx) { EV.closeSheet(); location.hash = `#/fixture/${fx.dataset.gofx}`; } });
+  el.addEventListener('change', e => { if (e.target.matches('[data-bank]')) { st.bank = EV.num(e.target.value) || 0; draw(); } });
+  draw();
+};
+
+function html(r0, st) {
+  const fx = EV.FIXTURE[r0.fx], H = EV.TEAM[fx.home], A = EV.TEAM[fx.away], m = modelFor(r0, st.line, st.side), r = rowFor(r0, st.line, st.side), prices = r ? r.prices : [];
+  const mine = EV.settings.myBooks, fair = EV.rowFair(m), bestAll = r ? EV.bestPrice(r, null) : { best: null, n: 0 }, bestMine = r ? EV.bestPrice(r, mine) : { best: null, n: 0 };
+  const sel = { ...r0, line: st.line, side: st.side }, p = r0.cat === 'player' ? EV.PLAYER[r0.pid] : null, lines = linesFor(r0);
+  const title = r0.cat === 'player' ? p.name : r0.cat === 'team' ? EV.TEAM[r0.team].name : `${H.name} v ${A.name}`;
+  const chosen = st.book ? prices.find(x => x.bk === st.book) : bestMine.best || bestAll.best;
+  let o = `<div class="dhead">${EV.demoTag()}<h2>${esc(title)}</h2><p class="muted">${EV.leagueBadge(r0.league)} <button type="button" class="linkbtn" data-gofx="${esc(fx.id)}">${esc(H.name)} v ${esc(A.name)}</button> · ${esc(EV.dayWord(fx.ko))} ${esc(EV.fmtTime(fx.ko))}${p ? ` · ${esc(EV.POS_NAME[p.pos])}, <button type="button" class="linkbtn" data-goteam="${esc(p.team)}">${esc(EV.TEAM[p.team].name)}</button>${p.status ? ` · <b class="warn">${esc(p.status === 'out' ? 'Out' : 'Doubtful')}: ${esc(p.statusNote)}</b>` : ''}` : ''}</p>
+    <p class="dsel"><b>${esc(r0.mkLabel)}</b> · ${esc(EV.lineText(sel))}</p></div>`;
+  // line and side controls
+  if (lines) o += `<div class="dctl"><span class="xs muted">Line</span><div class="chips">${lines.map(L => `<button type="button" class="chip${L === st.line ? ' on' : ''}" data-dline="${L}">${esc(r0.cat === 'player' ? `${L}+` : r0.mk === 'hcap' ? `${L > 0 ? '+' : '−'}${Math.abs(L)}` : String(L))}</button>`).join('')}</div>${EV.TMARKETS[r0.mk] && EV.TMARKETS[r0.mk].ou ? `<div class="seg">${['over', 'under'].map(sd => `<button type="button" data-dside="${sd}" class="${st.side === sd ? 'on' : ''}">${sd === 'over' ? 'Over' : 'Under'}</button>`).join('')}</div>` : ''}</div>`;
+  // headline numbers
+  const evB = chosen ? EV.rowEv(m, EV.effOdds(chosen)) : null;
+  o += `<div class="kpis"><div class="kpi"><small>Model probability</small><b>${m.ok ? EV.pct(m.p) : '—'}</b><span class="xs muted">${m.ok ? `80% range ${EV.pct(m.pLo, 0)}–${EV.pct(m.pHi, 0)}` : esc(m.reason || '')}</span>${EV.probBar(m)}</div>
+    <div class="kpi"><small>Fair odds</small><b>${fair ? esc(EV.fmtOdds(fair)) : '—'}</b><span class="xs muted">${m.push ? 'allowing for the stake back on a draw' : '1 ÷ probability'}</span></div>
+    <div class="kpi"><small>Best price · my bookmakers</small><b>${bestMine.best ? esc(EV.fmtOdds(bestMine.best.odds)) : '—'}</b><span class="xs muted">${bestMine.best ? esc(EV.BOOK[bestMine.best.bk].name) : 'No price available'}</span></div>
+    <div class="kpi"><small>Best price · all bookmakers</small><b>${bestAll.best ? esc(EV.fmtOdds(bestAll.best.odds)) : '—'}</b><span class="xs muted">${bestAll.best ? esc(EV.BOOK[bestAll.best.bk].name) : 'No price available'}</span></div>
+    <div class="kpi"><small>EV at ${chosen ? esc(EV.BOOK[chosen.bk].name) : 'best price'}</small><b>${chosen ? EV.evHtml(evB) : '<span class="muted">Unavailable</span>'}</b><span class="xs muted">${chosen ? `(p × ${esc(EV.fmtOdds(EV.effOdds(chosen), 'dec'))}${m.push ? ' + push' : ''} − 1)` : 'no current price, so no EV'}</span></div>
+    <div class="kpi"><small>Confidence</small><b>${m.ok ? EV.confHtml(m.conf) : '—'}</b><span class="xs muted">${m.n != null ? `${m.n} matches` : ''}</span></div></div>`;
+  // bookmaker comparison
+  o += `<h3>Bookmaker prices <small class="muted">(demo)</small></h3><div class="tblwrap"><table class="tbl compact"><tr><th class="sel">Bookmaker</th><th class="n">Odds</th><th>Movement</th><th>Updated</th><th class="n">EV</th><th>Link</th></tr>${EV.BOOKS.map(B => { const pr = prices.find(x => x.bk === B.id);
+      if (!pr) return `<tr class="dim"><th class="sel">${esc(B.name)}${mine.includes(B.id) ? ' <span class="minetag">mine</span>' : ''}</th><td colspan="5" class="muted">Not offered for this line</td></tr>`;
+      const fresh = EV.isFresh(pr), e = fresh ? EV.rowEv(m, EV.effOdds(pr)) : null;
+      return `<tr class="${fresh ? '' : 'stale'}${chosen && chosen.bk === B.id ? ' chosen' : ''}" data-dbook="${esc(B.id)}"><th class="sel">${esc(B.name)}${mine.includes(B.id) ? ' <span class="minetag">mine</span>' : ''}${B.exchange ? ` <small class="muted">after ${EV.settings.commission}% commission</small>` : ''}</th><td class="n"><b>${esc(EV.fmtOdds(pr.odds))}</b></td><td>${EV.spark(EV.priceHist(r.id, pr))} ${EV.moveHtml(pr)}</td><td class="nw">${esc(EV.ago(pr.at))}${fresh ? '' : ' <b class="warn">stale: not bettable</b>'}</td><td class="n">${fresh ? EV.evHtml(e) : '—'}</td><td><button type="button" class="btn sm" disabled title="No verified bookmaker link">No link</button></td></tr>`; }).join('')}</table></div>
+    <p class="xs muted">Tap a bookmaker to use its price below. Prices older than ${EV.STALE_MIN} minutes are shown greyed and never used. <b>Links:</b> OddsAPI.dev's documented responses carry no bookmaker or betslip links, so link buttons stay disabled unless a verified link source is added in Phase 2.</p>`;
+  // Kelly
+  const kf = chosen && m.ok ? EV.kelly(m.p + (m.push || 0) * 0, EV.effOdds(chosen)) : null, frac = kf != null ? kf / st.kdiv : null;
+  o += `<h3>Stake calculator <small class="muted">(fractional Kelly)</small></h3><div class="card kelly"><div class="krow"><label class="field"><span class="xs muted">Bankroll (£)</span><input class="in" inputmode="decimal" data-bank value="${esc(String(st.bank))}"></label><div><span class="xs muted">Fraction</span><div class="seg">${[10, 15, 20].map(d => `<button type="button" data-kdiv="${d}" class="${st.kdiv === d ? 'on' : ''}">1/${d} Kelly</button>`).join('')}</div></div></div>
+    ${!chosen ? '<p class="muted">No current price, so no stake.</p>' : !(evB > 0) ? '<p class="muted">No stake: this price has no positive EV.</p>' : !(st.bank > 0) ? '<p class="muted">Type a bankroll.</p>' : `<p>Full Kelly ${EV.pct(kf)} of bankroll → <b>1/${st.kdiv} Kelly: ${EV.gbp(Math.round(st.bank * frac * 100) / 100)}</b> at ${esc(EV.fmtOdds(chosen.odds))} (${esc(EV.BOOK[chosen.bk].name)}).</p>`}
+    <p class="xs muted">Kelly sizing assumes the model's probability is right; it is not a guarantee of profit, and with a demo model it is only a demonstration. Fractions (1/10 to 1/20) reduce the swings when the model is wrong.${m.push ? ' Draw no bet: the stake shown ignores the chance of a push, which is cautious.' : ''}</p></div>`;
+  // history and splits
+  o += r0.cat === 'player' ? playerHistory(r0, m, st.line) : teamHistory(r0, m, sel);
+  o += `<h3>Why the model says ${m.ok ? EV.pct(m.p) : '—'}</h3><div class="card why">${why(r0, m, st)}</div>`;
+  o += `<h3>Warnings and limitations</h3><ul class="warnlist">${warnings(r0, m).map(w => `<li>${w}</li>`).join('')}</ul>`;
+  return o;
+}
+
+function hitTiles(m) { const t = (k, l) => { const h = m.hit && m.hit[k]; return `<div class="kpi sm"><small>${l}</small><b>${h ? `${Math.round(h.pct * 100)}%` : '—'}</b><span class="xs muted">${h ? `${Math.round(h.pct * h.n)} of ${h.n}` : 'no data'}</span></div>`; };
+  return `<div class="kpis four">${t('l5', 'Last 5')}${t('l10', 'Last 10')}${t('l20', 'Last 20')}${t('all', 'All')}</div>`; }
+
+function playerHistory(r0, m, line) {
+  const p = EV.PLAYER[r0.pid], k = r0.mk, S = EV.PSTATS[k], log = p.log.slice(0, 20).reverse(), L = EV.LEAGUES.find(x => x.id === p.league);
+  if (L.missing.includes(k)) return `<h3>History</h3><div class="banner">${esc(S.label)} is not recorded for ${esc(L.name)} in the demo source, so there is no history and no probability. It is shown as missing, never as zero.</div>`;
+  const pts = log.map(x => ({ v: x.min > 0 ? x.st[k] : null, label: `${EV.fmtDay(x.ko)} v ${EV.TEAM[x.opp].name}${x.min > 0 ? ` (${x.min} min)` : ' (did not play)'}`, short: EV.TEAM[x.opp].code }));
+  const played = p.log.filter(x => x.min > 0 && x.st[k] != null), per90 = a => { const mins = EV.sum(a.map(x => x.min)); return mins ? (EV.sum(a.map(x => x.st[k])) / mins) * 90 : null; };
+  const H = played.filter(x => x.home), A = played.filter(x => !x.home), c = m.opp || EV.concession(m.base ? m.base.oppId : null, p.pos, k);
+  return `<h3>Historical hit rate at ${line}+</h3>${hitTiles(m)}
+    <h3>Last ${log.length} matches <small class="muted">(oldest left; green = ${line}+)</small></h3>${EV.barChart(pts, line - 0.5, { hit: v => v >= line, lineLabel: `${line}+`, aria: `${S.label} per match` })}
+    <div class="kpis four"><div class="kpi sm"><small>Season per 90</small><b>${EV.f1(per90(played))}</b><span class="xs muted">${played.length} matches</span></div><div class="kpi sm"><small>Home per 90</small><b>${EV.f1(per90(H))}</b><span class="xs muted">${H.length} matches</span></div><div class="kpi sm"><small>Away per 90</small><b>${EV.f1(per90(A))}</b><span class="xs muted">${A.length} matches</span></div><div class="kpi sm"><small>Minutes (last 6)</small><b>${EV.f1(EV.mean(p.log.slice(0, 6).map(x => x.min || 0)))}</b><span class="xs muted">expected ${m.expMin ?? '—'}</span></div></div>
+    <h3>Opponent</h3><p>${esc(EV.TEAM[m.base ? m.base.oppId : r0.team].name)} allow <b>${EV.f1(c.per90)}</b> ${esc(S.label.toLowerCase())} per 90 to ${esc(EV.POS_NAME[p.pos].toLowerCase())}s (league average ${EV.f1(c.lg)}): ${c.raw > 1.05 ? 'more than average' : c.raw < 0.95 ? 'fewer than average' : 'about average'}.</p>
+    <h3>Match log</h3><div class="tblwrap"><table class="tbl compact"><tr><th class="sel">Date</th><th>Opponent</th><th>H/A</th><th class="n">Min</th><th class="n">${esc(S.short)}</th></tr>${p.log.slice(0, 20).map(x => `<tr><th class="sel">${esc(EV.fmtDay(x.ko))}</th><td>${esc(EV.TEAM[x.opp].name)}</td><td>${x.home ? 'H' : 'A'}</td><td class="n">${x.min || '—'}</td><td class="n">${x.min > 0 ? (x.st[k] == null ? '<span class="muted" title="not recorded">n/r</span>' : `<b class="${x.st[k] >= line ? '' : 'muted'}">${x.st[k]}</b>`) : '<span class="muted">DNP</span>'}</td></tr>`).join('')}</table></div>`;
+}
+function teamHistory(r0, m, sel) {
+  const M = EV.TMARKETS[r0.mk], k = M.stat, fx = EV.FIXTURE[r0.fx], vals = (m.values || []).slice(0, 20).reverse();
+  const pts = vals.map(x => ({ v: x.v != null ? x.v : x.h, label: `${EV.fmtDay(x.r.ko)} v ${EV.TEAM[x.r.opp].name}`, short: EV.TEAM[x.r.opp].code }));
+  const isCount = vals.some(x => x.v != null);
+  const tbl = [fx.home, fx.away].map(t => { const T = EV.TEAM[t], hm = T.log.filter(x => x.home), aw = T.log.filter(x => !x.home), av = (a, f) => EV.f1(EV.mean(a.map(f).filter(v => v != null)));
+    return `<tr><th class="sel">${esc(T.name)}</th><td class="n">${av(T.log, x => x.for[k])}</td><td class="n">${av(T.log, x => x.against[k])}</td><td class="n">${av(hm, x => x.for[k])}</td><td class="n">${av(aw, x => x.for[k])}</td></tr>`; }).join('');
+  return `<h3>Historical hit rate</h3>${hitTiles(m)}<p class="xs muted">${M.cat === 'team' ? 'From this team\'s matches.' : ['result', 'dc', 'dnb'].includes(r0.mk) ? 'Home outcomes from the home team\'s results, away outcomes from the away team\'s, the draw from both.' : 'Both teams\' recent matches pooled.'}</p>
+    ${pts.length ? `<h3>Recent matches <small class="muted">(oldest left)</small></h3>${isCount ? EV.barChart(pts, sel.line, { hit: v => (sel.side === 'under' ? v < sel.line : r0.mk === 'hcap' ? v + sel.line > 0 : v > sel.line), lineLabel: String(sel.line ?? '') }) : `<p>${vals.map(x => `<span class="dot ${x.h ? 'fh' : 'fm'}" title="${esc(EV.fmtDay(x.r.ko))}">${x.h ? '✓' : '✗'}</span>`).join('')}</p>`}` : ''}
+    <h3>${esc(EV.TSTATS[k].label)} per match: team for v opponent against</h3><div class="tblwrap"><table class="tbl compact"><tr><th class="sel">Team</th><th class="n">For</th><th class="n">Against</th><th class="n">For at home</th><th class="n">For away</th></tr>${tbl}</table></div>`;
+}
+function why(r0, m, st) {
+  if (!m.ok) return `<p>${esc(m.reason || 'No probability available.')}</p>`;
+  if (r0.cat === 'player') { const p = EV.PLAYER[r0.pid], S = EV.PSTATS[r0.mk], c = m.opp;
+    return `<p>${esc(p.name)} averages <b>${EV.f1(m.rate)}</b> ${esc(S.label.toLowerCase())} per 90 minutes (recent matches count more; pulled slightly towards the ${esc(EV.POS_NAME[p.pos].toLowerCase())} average of ${EV.f1(m.base.prior)}). He is expected to play about <b>${m.expMin} minutes</b>${p.status === 'doubtful' ? ' (cut because of a fitness doubt)' : ''}. ${esc(EV.TEAM[m.base.oppId].name)} allow ${c.raw >= 1 ? `${Math.round((c.raw - 1) * 100)}% more` : `${Math.round((1 - c.raw) * 100)}% fewer`} than average to his position (half of that is used), and ${m.home ? 'he is at home' : 'he is away'}.</p>
+      <p>That gives an expected <b>${EV.f1(m.mean)}</b> ${esc(S.label.toLowerCase())}, and a ${S.disp === Infinity ? 'Poisson' : 'negative-binomial'} spread around it gives <b>${EV.pct(m.p)}</b> for ${st.line} or more. The range ${EV.pct(m.pLo, 0)}–${EV.pct(m.pHi, 0)} is what the same calculation gives at the low and high end of his rate.</p>`; }
+  const fx = EV.FIXTURE[r0.fx], k = EV.TMARKETS[r0.mk].stat;
+  return `<p>Expected ${esc(EV.TSTATS[k].label.toLowerCase())}: <b>${esc(EV.TEAM[fx.home].name)} ${EV.f1(m.H.mean)}</b>, <b>${esc(EV.TEAM[fx.away].name)} ${EV.f1(m.A.mean)}</b>, from each team's average for, the opponent's average against (both pulled towards the league average) and home advantage.</p>
+    <p>${k === 'goals' ? 'Every possible score is given a Poisson probability, and the outcomes are added up' : 'Each team\'s count follows a negative-binomial spread, combined for match totals'}: <b>${EV.pct(m.p)}</b>${m.push ? `, with ${EV.pct(m.push)} for a draw (stake returned)` : ''}.</p>`;
+}
+function warnings(r0, m) { const w = ['<b>Demo model on synthetic data.</b> Not trained or backtested on real football; do not bet from it.'];
+  if (m.n != null && m.n < 10) w.push(`Small sample: ${m.n} matches.`); if (m.missing) w.push(`${m.missing} of his appearances have no figure for this statistic; they are left out (not counted as zero).`);
+  if (r0.cat === 'player' && EV.PLAYER[r0.pid].status) w.push(`Team news: ${esc(EV.PLAYER[r0.pid].statusNote)}.`); if (m.ok && m.pHi - m.pLo > 0.2) w.push('Wide probability range: the model is unsure.');
+  if (m.conf && m.conf.label === 'Low') w.push('Low confidence.'); w.push('Lineups are not confirmed in Phase 1: player prices assume he plays his expected minutes.'); return w; }
+})();
+
+/* The EV Hub — Dashboard, Player Stats, Team Stats, Fixtures. */
+'use strict';
+(() => {
+const EV = window.EV, esc = EV.esc;
+
+// ================= Dashboard
+EV.viewDashboard = root => {
+  const S = EV.settings, lgs = S.dashLeagues, books = S.dashBasis === 'all' ? EV.BOOKS.map(b => b.id) : S.myBooks;
+  const fxs = EV.FIXTURES.filter(f => !lgs.length || lgs.includes(f.league));
+  const rows = EV.ROWS.filter(r => !lgs.length || lgs.includes(r.league)).map(r => { const { best, n } = EV.bestPrice(r, books); const ev = best ? EV.rowEv(r.m, EV.effOdds(best)) : null; return { r, best, n, ev, score: best ? EV.scoreOf(r.m, best, n) : null }; });
+  const pos = rows.filter(x => x.ev > 0), top = rows.filter(x => x.score != null && x.ev > 0).sort((a, b) => b.score - a.score).slice(0, 8);
+  const allP = EV.ROWS.flatMap(r => r.prices), stale = allP.filter(p => !EV.isFresh(p)).length, newest = Math.max(...allP.map(p => p.at));
+  const moves = []; for (const r of EV.ROWS) { if (lgs.length && !lgs.includes(r.league)) continue; for (const p of r.prices) if (EV.isFresh(p) && books.includes(p.bk) && p.prev !== p.odds) moves.push({ r, p, ch: p.odds / p.prev - 1 }); }
+  moves.sort((a, b) => Math.abs(1 / b.p.prev - 1 / b.p.odds) - Math.abs(1 / a.p.prev - 1 / a.p.odds)); // biggest change in implied probability
+  const hist = [-20, -15, -10, -5, 0, 5, 10, 15].map((a, i, arr) => ({ a, b: arr[i + 1] ?? Infinity, n: rows.filter(x => x.ev != null && x.ev >= a && x.ev < (arr[i + 1] ?? Infinity)).length }));
+  const hmax = Math.max(1, ...hist.map(h => h.n));
+  root.innerHTML = `<section class="hero"><div><p class="eyebrow">Football odds &amp; expected value</p><h1>The EV Hub</h1><p class="muted">Model probabilities, fair odds and EV for player, team and match markets, compared across bookmakers.</p></div>
+      <div class="herocta"><a class="btn acc" href="#/explorer">Open EV Explorer</a><a class="btn" href="#/fixtures">Fixtures</a></div></section>
+    <div class="banner demo"><b>DEMO MODE — SAMPLE DATA, NOT LIVE BETTING ODDS.</b> Clubs, players, statistics and prices are synthetic. Nothing on this site is a real recommendation.</div>
+    <div class="dashf"><div><span class="xs muted">Leagues</span>${EV.chips('dashLeagues', EV.LEAGUES.map(l => [l.id, l.name]), lgs)}</div><div><span class="xs muted">Bookmakers</span>${EV.seg('dashBasis', [['mine', `My bookmakers (${S.myBooks.length})`], ['all', 'All']], S.dashBasis)}</div></div>
+    <div class="kpis">${[[fxs.length, 'Upcoming fixtures'], [`<span class="ev-pos">${pos.length.toLocaleString('en-GB')}</span>`, 'Positive-EV selections'], [rows.length.toLocaleString('en-GB'), 'Selections priced by the model'], [pos.length ? `<span class="ev-pos">${EV.sgn(Math.max(...pos.map(x => x.ev)))}</span>` : '—', 'Highest EV'], [books.length, 'Bookmakers counted'], [EV.fmtTime(newest), 'Latest demo price']].map(([v, l]) => `<div class="kpi"><small>${l}</small><b>${v}</b></div>`).join('')}</div>
+    <div class="grid2">
+      <section class="card"><div class="ch"><h2>Highest-ranked opportunities</h2>${EV.demoTag()}</div><p class="xs muted">Ranked by Best Overall, an illustrative cautious score (<button type="button" class="linkbtn" data-scoredoc>how it works</button>). Not a recommendation.</p>
+        ${top.length ? `<ol class="toplist">${top.map(x => `<li data-detail="${esc(x.r.id)}" tabindex="0"><div><b>${esc(x.r.subject)}</b><small>${esc(x.r.mkLabel)} · ${esc(EV.selText(x.r))} · ${esc(EV.fxName(EV.FIXTURE[x.r.fx]))}</small></div><div class="tr"><span>${EV.pct(x.r.m.p)} · fair ${esc(EV.fmtOdds(EV.rowFair(x.r.m)))}</span><span><b>${esc(EV.fmtOdds(x.best.odds))}</b> ${esc(EV.BOOK[x.best.bk].name)} ${EV.evHtml(x.ev)}</span></div></li>`).join('')}</ol>` : '<p class="muted">No positive-EV selections for these filters.</p>'}
+        <a class="btn wide" href="#/explorer" data-quick="best">See every selection</a></section>
+      <section class="card"><div class="ch"><h2>Upcoming fixtures</h2></div><ul class="fxlist">${fxs.slice(0, 8).map(f => { const n = rows.filter(x => x.r.fx === f.id && x.ev > 0).length; return `<li><a href="#/fixture/${esc(f.id)}"><span>${EV.leagueBadge(f.league)} <b>${esc(EV.TEAM[f.home].name)}</b> v <b>${esc(EV.TEAM[f.away].name)}</b></span><small>${esc(EV.dayWord(f.ko))} ${esc(EV.fmtTime(f.ko))} · <span class="ev-pos">${n}</span> EV+</small></a></li>`; }).join('')}</ul><a class="btn wide" href="#/fixtures">All fixtures</a></section>
+      <section class="card"><div class="ch"><h2>Recent odds movements</h2>${EV.demoTag()}</div><ul class="mvlist">${moves.slice(0, 8).map(x => `<li data-detail="${esc(x.r.id)}" tabindex="0"><div><b>${esc(x.r.subject)}</b><small>${esc(x.r.mkLabel)} · ${esc(EV.selText(x.r))} · ${esc(EV.BOOK[x.p.bk].name)}</small></div><div class="tr">${EV.spark(EV.priceHist(x.r.id, x.p))}<span>${esc(EV.fmtOdds(x.p.prev))} → <b>${esc(EV.fmtOdds(x.p.odds))}</b></span></div></li>`).join('') || '<li class="muted">No recent changes.</li>'}</ul></section>
+      <section class="card"><div class="ch"><h2>EV across all selections</h2></div><div class="hist">${hist.map(h => `<div class="hb"><i class="${h.a >= 0 ? 'ev-posbg' : 'ev-negbg'}" style="height:${(h.n / hmax) * 100}%"></i><small>${h.a < -15 ? '< −15' : h.a >= 15 ? '15+' : `${h.a > 0 ? '+' : ''}${h.a}`}</small><b>${h.n}</b></div>`).join('')}</div><p class="xs muted">EV % at the best current price (${esc(S.dashBasis === 'all' ? 'all bookmakers' : 'my bookmakers')}). Most selections are negative: bookmakers build a margin into every price.</p>
+        <div class="quick"><span class="xs muted">Quick links</span><button type="button" class="chip" data-quick="pos">Positive EV today</button><button type="button" class="chip" data-quick="shots">Player shots</button><button type="button" class="chip" data-quick="corners">Corners</button><button type="button" class="chip" data-quick="goals">Match goals</button></div></section>
+      <section class="card wide"><div class="ch"><h2>Data freshness &amp; sources</h2></div><div class="srcs">
+        <div class="src on"><b>Demo data</b><span>Active · synthetic clubs, players, statistics and prices, generated in your browser</span><small>Built ${esc(EV.fmtKO(EV.NOW))} · ${allP.length.toLocaleString('en-GB')} demo prices, ${stale.toLocaleString('en-GB')} stale (older than ${EV.STALE_MIN} min, never used)</small></div>
+        <div class="src off"><b>OddsAPI.dev</b><span>Not connected · Phase 2 bookmaker odds</span><small>Needs a private backend (the API key must never be in this website)</small></div>
+        <div class="src off"><b>Player &amp; team statistics</b><span>Not connected · Phase 2</span><small>OddsAPI.dev supplies odds only; a licensed statistics provider is still to be chosen</small></div>
+        <div class="src off"><b>Probability model</b><span>Demo model · not trained on real football</span><small>A real model needs licensed history, backtesting and calibration first</small></div></div></section>
+    </div>`;
+  EV.bindChips(root, (n, v) => { if (n === 'dashLeagues') S.dashLeagues = v; if (n === 'dashBasis') S.dashBasis = v; EV.saveSettings(); EV.rerender(root, EV.viewDashboard); });
+  root.addEventListener('click', e => { const d = e.target.closest('[data-detail]'); if (d) { EV.openDetail(d.dataset.detail); return; } if (e.target.closest('[data-scoredoc]')) { EV.scoreDoc(); return; }
+    const q = e.target.closest('[data-quick]'); if (!q) return; e.preventDefault(); const v = q.dataset.quick, L = S.dashLeagues;
+    EV.openExplorer(v === 'pos' ? { tab: 'all', when: 'today', evSign: 'pos', sort: 'evDesc', leagues: L } : v === 'shots' ? { tab: 'player', markets: ['shots', 'sot'], leagues: L } : v === 'corners' ? { tab: 'all', markets: ['mcorners', 'tcorners'], leagues: L } : v === 'goals' ? { tab: 'match', markets: ['mgoals', 'btts'], leagues: L } : { tab: 'all', sort: 'best', leagues: L }); });
+  root.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-detail]')) EV.openDetail(e.target.dataset.detail); });
+};
+
+// ================= Player Stats
+const PCOLS = [['apps', 'Apps'], ['min', 'Mins'], ['goals', 'Goals'], ['assists', 'Assists'], ['shots', 'Shots'], ['sot', 'SOT'], ['tackles', 'Tackles'], ['tacklesWon', 'Tkl won'], ['fouls', 'Fouls'], ['fouled', 'Fouled'], ['passes', 'Passes'], ['cards', 'Cards'], ['saves', 'Saves']];
+const pAgg = p => { const pl = p.log.filter(x => x.min > 0), out = { apps: pl.length, min: EV.sum(pl.map(x => x.min)) };
+  for (const k of EV.PSTAT_KEYS) { const v = pl.filter(x => x.st[k] != null); out[k] = v.length ? { tot: EV.sum(v.map(x => x.st[k])), min: EV.sum(v.map(x => x.min)), n: v.length, miss: pl.length - v.length } : null; } return out; };
+EV.pAgg = pAgg;
+EV.viewPlayers = root => {
+  const st = { ...{ lg: '', team: '', pos: '', q: '', mode: 'p90', sort: 'min', dir: -1 }, ...EV.sload('pst', {}) };
+  root.innerHTML = `<header class="phead"><h1>Player Stats</h1><p class="muted">Season figures for every demo player. Tap a player for match-by-match history. ${EV.demoTag('DEMO DATA')}</p></header>
+    <div class="toolbar"><input class="in search" type="search" data-p="q" value="${esc(st.q)}" placeholder="Search player"><select class="in" data-p="lg"><option value="">All leagues</option>${EV.LEAGUES.map(l => `<option value="${l.id}"${st.lg === l.id ? ' selected' : ''}>${esc(l.name)}</option>`).join('')}</select><select class="in" data-p="team" id="pteam"></select></div>
+    <div class="toolbar">${EV.seg('pos', [['', 'All'], ['GK', 'GK'], ['DF', 'DF'], ['MF', 'MF'], ['FW', 'FW']], st.pos)}${EV.seg('mode', [['p90', 'Per 90'], ['tot', 'Totals']], st.mode)}</div><div id="pres"></div>
+    <p class="xs muted">— = not recorded (never counted as zero). Per 90 uses only the minutes where the statistic was recorded.</p>`;
+  const teamSel = root.querySelector('#pteam');
+  const fillTeams = () => { teamSel.innerHTML = `<option value="">All clubs</option>${EV.TEAMS.filter(t => !st.lg || t.league === st.lg).map(t => `<option value="${t.id}"${st.team === t.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}`; };
+  const draw = () => { EV.ssave('pst', st); const q = st.q.trim().toLowerCase();
+    const list = EV.PLAYERS.filter(p => (!st.lg || p.league === st.lg) && (!st.team || p.team === st.team) && (!st.pos || p.pos === st.pos) && (!q || p.name.toLowerCase().includes(q))).map(p => ({ p, a: pAgg(p) }));
+    const val = (x, k) => { if (k === 'apps' || k === 'min') return x.a[k]; const c = x.a[k]; if (!c) return null; return st.mode === 'tot' ? c.tot : c.min ? (c.tot / c.min) * 90 : null; };
+    list.sort((x, y) => { const a = st.sort === 'name' ? null : val(x, st.sort), b = st.sort === 'name' ? null : val(y, st.sort); if (st.sort === 'name') return x.p.name.localeCompare(y.p.name) * -st.dir; if (a == null && b == null) return 0; if (a == null) return 1; if (b == null) return -1; return (a - b) * st.dir; });
+    root.querySelector('#pres').innerHTML = `<p class="xs muted">${list.length} players</p><div class="tblwrap"><table class="tbl"><tr><th class="sel"><button type="button" class="sorth" data-psort="name">Player${st.sort === 'name' ? ' ▴' : ''}</button></th><th>Club</th><th>Pos</th>${PCOLS.map(([k, l]) => `<th class="n"><button type="button" class="sorth${st.sort === k ? ' on' : ''}" data-psort="${k}">${l}${st.sort === k ? (st.dir < 0 ? ' ▾' : ' ▴') : ''}</button></th>`).join('')}</tr>
+      ${list.slice(0, 200).map(x => `<tr data-player="${esc(x.p.id)}" tabindex="0"><th class="sel"><b>${esc(x.p.name)}</b>${x.p.status ? ` <span class="warn xs">${x.p.status === 'out' ? 'OUT' : 'doubt'}</span>` : ''}</th><td class="nw">${esc(EV.TEAM[x.p.team].name)}</td><td>${x.p.pos}</td>${PCOLS.map(([k]) => { const v = val(x, k); return `<td class="n">${v == null ? '<span class="muted" title="not recorded">—</span>' : esc(k === 'apps' || k === 'min' || st.mode === 'tot' ? String(Math.round(v)) : v.toFixed(2))}</td>`; }).join('')}</tr>`).join('')}</table></div>${list.length > 200 ? '<p class="xs muted">Showing the first 200: narrow the filters to see others.</p>' : ''}`; };
+  fillTeams(); draw();
+  root.addEventListener('input', e => { if (e.target.dataset.p === 'q') { st.q = e.target.value; draw(); } });
+  root.addEventListener('change', e => { const k = e.target.dataset.p; if (k === 'lg') { st.lg = e.target.value; st.team = ''; fillTeams(); draw(); } if (k === 'team') { st.team = e.target.value; draw(); } });
+  EV.bindChips(root, (n, v) => { st[n] = v; draw(); });
+  root.addEventListener('click', e => { const s = e.target.closest('[data-psort]'); if (s) { const k = s.dataset.psort; st.dir = st.sort === k ? -st.dir : -1; st.sort = k; draw(); return; } const r = e.target.closest('[data-player]'); if (r) location.hash = `#/player/${r.dataset.player}`; });
+};
+
+EV.viewPlayer = (root, id) => {
+  const p = EV.PLAYER[id]; if (!p) { root.innerHTML = '<div class="empty"><b>Player not found.</b><a class="btn" href="#/players">Player Stats</a></div>'; return; }
+  const T = EV.TEAM[p.team], nx = EV.FIXTURES.find(f => f.home === p.team || f.away === p.team), keys = EV.PSTAT_KEYS.filter(k => (k === 'saves') === (p.pos === 'GK') || ['passes', 'fouls', 'fouled', 'cards'].includes(k));
+  const st = { k: keys.includes(EV.sload('pk', 'shots')) ? EV.sload('pk', 'shots') : p.pos === 'GK' ? 'saves' : keys[0], line: null };
+  const a = pAgg(p), L = EV.LEAGUES.find(x => x.id === p.league);
+  const draw = () => { const k = st.k, S = EV.PSTATS[k]; if (st.line == null || !S.lines.includes(st.line)) st.line = S.lines[Math.min(1, S.lines.length - 1)];
+    const log = p.log.slice(0, 20), pts = log.slice().reverse().map(x => ({ v: x.min > 0 ? x.st[k] : null, label: `${EV.fmtDay(x.ko)} v ${EV.TEAM[x.opp].name}${x.min > 0 ? ` (${x.min} min)` : ' (did not play)'}`, short: EV.TEAM[x.opp].code }));
+    const vals = p.log.filter(x => x.min > 0 && x.st[k] != null).map(x => x.st[k]), hr = n => { const v = vals.slice(0, n); return v.length ? `${Math.round((v.filter(x => x >= st.line).length / v.length) * 100)}% <small>(${v.length})</small>` : '—'; };
+    const m = nx ? EV.playerModel(p.id, k, nx.id, st.line) : null, notRec = L.missing.includes(k);
+    root.querySelector('#pchart').innerHTML = notRec ? `<div class="banner">${esc(S.label)} is not recorded for ${esc(L.name)} in the demo source: shown as missing, never as zero.</div>` : `<div class="dctl"><span class="xs muted">Line</span><div class="chips">${S.lines.map(x => `<button type="button" class="chip${x === st.line ? ' on' : ''}" data-pline="${x}">${x}+</button>`).join('')}</div></div>
+      ${EV.barChart(pts, st.line - 0.5, { hit: v => v >= st.line, lineLabel: `${st.line}+` })}
+      <div class="kpis four"><div class="kpi sm"><small>Last 5</small><b>${hr(5)}</b></div><div class="kpi sm"><small>Last 10</small><b>${hr(10)}</b></div><div class="kpi sm"><small>Last 20</small><b>${hr(20)}</b></div><div class="kpi sm"><small>Next game · model</small><b>${m && m.ok ? EV.pct(m.p) : '—'}</b><span class="xs muted">${m && m.ok ? `fair ${esc(EV.fmtOdds(EV.rowFair(m)))}` : esc(m ? m.reason || '' : 'no fixture')}</span></div></div>`; };
+  const split = (f, k) => { const v = p.log.filter(x => x.min > 0 && f(x) && x.st[k] != null), mins = EV.sum(v.map(x => x.min)); return mins ? ((EV.sum(v.map(x => x.st[k])) / mins) * 90).toFixed(2) : '—'; };
+  root.innerHTML = `<header class="phead"><a class="back" href="#/players">‹ Player Stats</a><h1>${esc(p.name)}</h1><p class="muted">${esc(EV.POS_NAME[p.pos])} · <a href="#/team/${esc(T.id)}">${esc(T.name)}</a> · ${EV.leagueBadge(p.league)} ${p.status ? `<b class="warn">${p.status === 'out' ? 'Out' : 'Doubtful'}: ${esc(p.statusNote)}</b>` : ''} ${EV.demoTag('DEMO PLAYER')}</p></header>
+    ${nx ? `<div class="card nextfx"><div><small class="muted">Next fixture</small><b>${esc(EV.fxName(nx))}</b><span class="xs muted">${esc(EV.dayWord(nx.ko))} ${esc(EV.fmtTime(nx.ko))} · expected minutes ${EV.expMinutes(p) ?? 'out'}</span></div><button type="button" class="btn acc" data-pexp>His markets in EV Explorer</button></div>` : ''}
+    <div class="kpis">${[['Apps', a.apps], ['Minutes', a.min], ['Goals', a.goals ? a.goals.tot : '—'], ['Assists', a.assists ? a.assists.tot : '—'], ['Shots / 90', a.shots && a.shots.min ? ((a.shots.tot / a.shots.min) * 90).toFixed(2) : '—'], ['Cards', a.cards ? a.cards.tot : '—']].map(([l, v]) => `<div class="kpi"><small>${l}</small><b>${v}</b></div>`).join('')}</div>
+    <div class="chips" data-chips="pk" data-multi="0">${keys.map(k => `<button type="button" class="chip${k === st.k ? ' on' : ''}" data-v="${k}">${esc(EV.PSTATS[k].label)}</button>`).join('')}</div><div id="pchart"></div>
+    <h3>Home and away <small class="muted">(per 90)</small></h3><div class="tblwrap"><table class="tbl compact"><tr><th class="sel">Statistic</th><th class="n">All</th><th class="n">Home</th><th class="n">Away</th></tr>${keys.map(k => `<tr><th class="sel">${esc(EV.PSTATS[k].label)}</th><td class="n">${split(() => true, k)}</td><td class="n">${split(x => x.home, k)}</td><td class="n">${split(x => !x.home, k)}</td></tr>`).join('')}</table></div>
+    <h3>Match log</h3><div class="tblwrap"><table class="tbl compact"><tr><th class="sel">Date</th><th>Opponent</th><th>H/A</th><th class="n">Min</th>${keys.map(k => `<th class="n">${esc(EV.PSTATS[k].short)}</th>`).join('')}</tr>${p.log.map(x => `<tr><th class="sel">${esc(EV.fmtDay(x.ko))}</th><td class="nw">${esc(EV.TEAM[x.opp].name)}</td><td>${x.home ? 'H' : 'A'}</td><td class="n">${x.min || '<span class="muted">DNP</span>'}</td>${keys.map(k => `<td class="n">${x.min > 0 ? (x.st[k] == null ? '<span class="muted">—</span>' : x.st[k]) : ''}</td>`).join('')}</tr>`).join('')}</table></div>
+    <p class="xs muted">DNP = in the squad list but did not play (no figures, not zero). — = not recorded.</p>`;
+  draw();
+  EV.bindChips(root, (n, v) => { if (n === 'pk') { st.k = v; EV.ssave('pk', v); st.line = null; draw(); } });
+  root.addEventListener('click', e => { const b = e.target.closest('[data-pline]'); if (b) { st.line = Number(b.dataset.pline); draw(); } if (e.target.closest('[data-pexp]')) EV.openExplorer({ tab: 'player', q: p.name, sort: 'best' }); });
+};
+
+// ================= Team Stats
+const TK = [['goals', 'Goals'], ['shots', 'Shots'], ['sot', 'SOT'], ['corners', 'Corners'], ['cards', 'Cards'], ['fouls', 'Fouls']];
+EV.standings = lg => EV.TEAMS.filter(t => t.league === lg).map(t => { const l = t.log; const w = l.filter(x => x.gf > x.ga).length, d = l.filter(x => x.gf === x.ga).length;
+  return { t, p: l.length, w, d, l: l.length - w - d, gf: EV.sum(l.map(x => x.gf)), ga: EV.sum(l.map(x => x.ga)), pts: w * 3 + d, form: l.slice(0, 5).map(x => (x.gf > x.ga ? 'W' : x.gf < x.ga ? 'L' : 'D')) }; })
+  .sort((a, b) => b.pts - a.pts || b.gf - b.ga - (a.gf - a.ga) || b.gf - a.gf);
+const avgOf = (log, f) => { const v = log.map(f).filter(x => x != null); return v.length ? EV.mean(v) : null; };
+EV.viewTeams = root => {
+  const st = { lg: 'epl', side: 'for', venue: 'all', ...EV.sload('tst', {}) };
+  const draw = () => { EV.ssave('tst', st); const tb = EV.standings(st.lg);
+    root.querySelector('#tres').innerHTML = `<h2>Table</h2><div class="tblwrap"><table class="tbl"><tr><th class="sel">Club</th><th class="n">P</th><th class="n">W</th><th class="n">D</th><th class="n">L</th><th class="n">GF</th><th class="n">GA</th><th class="n">GD</th><th class="n">Pts</th><th>Form</th></tr>${tb.map((x, i) => `<tr data-team="${x.t.id}" tabindex="0"><th class="sel"><span class="pos">${i + 1}</span> <b>${esc(x.t.name)}</b></th><td class="n">${x.p}</td><td class="n">${x.w}</td><td class="n">${x.d}</td><td class="n">${x.l}</td><td class="n">${x.gf}</td><td class="n">${x.ga}</td><td class="n">${x.gf - x.ga > 0 ? '+' : ''}${x.gf - x.ga}</td><td class="n"><b>${x.pts}</b></td><td>${x.form.map(f => `<i class="wdl w-${f}">${f}</i>`).join('')}</td></tr>`).join('')}</table></div>
+      <h2>Team statistics per match</h2><div class="toolbar">${EV.seg('side', [['for', 'For (made)'], ['against', 'Against (conceded)']], st.side)}${EV.seg('venue', [['all', 'All'], ['home', 'Home'], ['away', 'Away']], st.venue)}</div>
+      <div class="tblwrap"><table class="tbl"><tr><th class="sel">Club</th>${TK.map(([, l]) => `<th class="n">${l}</th>`).join('')}</tr>${tb.map(x => { const lg = x.t.log.filter(r => st.venue === 'all' || r.home === (st.venue === 'home')); return `<tr data-team="${x.t.id}" tabindex="0"><th class="sel"><b>${esc(x.t.name)}</b></th>${TK.map(([k]) => { const v = k === 'goals' ? avgOf(lg, r => (st.side === 'for' ? r.gf : r.ga)) : avgOf(lg, r => r[st.side][k]); return `<td class="n">${v == null ? '—' : v.toFixed(2)}</td>`; }).join('')}</tr>`; }).join('')}</table></div>
+      <p class="xs muted">Averages leave out matches where a statistic was not recorded. ${EV.demoTag('DEMO DATA')}</p>`; };
+  root.innerHTML = `<header class="phead"><h1>Team Stats</h1><p class="muted">Tables and per-match team statistics, made and conceded, home and away.</p></header><div class="toolbar">${EV.seg('lg', EV.LEAGUES.map(l => [l.id, l.name]), st.lg)}</div><div id="tres"></div>`;
+  draw();
+  EV.bindChips(root, (n, v) => { st[n] = v; draw(); });
+  root.addEventListener('click', e => { const r = e.target.closest('[data-team]'); if (r) location.hash = `#/team/${r.dataset.team}`; });
+};
+EV.viewTeam = (root, id) => {
+  const T = EV.TEAM[id]; if (!T) { root.innerHTML = '<div class="empty"><b>Team not found.</b><a class="btn" href="#/teams">Team Stats</a></div>'; return; }
+  const row = EV.standings(T.league).findIndex(x => x.t.id === id) + 1, nx = EV.FIXTURES.find(f => f.home === id || f.away === id), h = T.log.filter(x => x.home), a = T.log.filter(x => !x.home);
+  const cell = (lg, k, side) => { const v = k === 'goals' ? avgOf(lg, r => (side === 'for' ? r.gf : r.ga)) : avgOf(lg, r => r[side][k]); return v == null ? '—' : v.toFixed(2); };
+  root.innerHTML = `<header class="phead"><a class="back" href="#/teams">‹ Team Stats</a><h1>${esc(T.name)}</h1><p class="muted">${EV.leagueBadge(T.league)} ${esc(EV.leagueName(T.league))} · ${row}${['st', 'nd', 'rd'][row - 1] || 'th'} in the table ${EV.demoTag('DEMO CLUB')}</p></header>
+    ${nx ? `<div class="card nextfx"><div><small class="muted">Next fixture</small><b>${esc(EV.fxName(nx))}</b><span class="xs muted">${esc(EV.dayWord(nx.ko))} ${esc(EV.fmtTime(nx.ko))}</span></div><a class="btn acc" href="#/fixture/${esc(nx.id)}">Match analysis</a></div>` : ''}
+    <h3>Per match: made and conceded</h3><div class="tblwrap"><table class="tbl compact"><tr><th class="sel">Statistic</th><th class="n">For</th><th class="n">Against</th><th class="n">For (home)</th><th class="n">Against (home)</th><th class="n">For (away)</th><th class="n">Against (away)</th></tr>${TK.map(([k, l]) => `<tr><th class="sel">${l}</th><td class="n">${cell(T.log, k, 'for')}</td><td class="n">${cell(T.log, k, 'against')}</td><td class="n">${cell(h, k, 'for')}</td><td class="n">${cell(h, k, 'against')}</td><td class="n">${cell(a, k, 'for')}</td><td class="n">${cell(a, k, 'against')}</td></tr>`).join('')}</table></div>
+    <h3>Goals per match <small class="muted">(oldest left)</small></h3>${EV.barChart(T.log.slice(0, 20).reverse().map(x => ({ v: x.gf, label: `${EV.fmtDay(x.ko)} v ${EV.TEAM[x.opp].name}: ${x.gf}-${x.ga}`, short: EV.TEAM[x.opp].code })), null, { hit: () => null })}
+    <h3>Results</h3><div class="tblwrap"><table class="tbl compact"><tr><th class="sel">Date</th><th>Opponent</th><th>H/A</th><th class="n">Score</th>${TK.slice(1).map(([, l]) => `<th class="n">${l}</th>`).join('')}</tr>${T.log.map(x => `<tr><th class="sel">${esc(EV.fmtDay(x.ko))}</th><td class="nw"><a href="#/team/${x.opp}">${esc(EV.TEAM[x.opp].name)}</a></td><td>${x.home ? 'H' : 'A'}</td><td class="n"><i class="wdl w-${x.gf > x.ga ? 'W' : x.gf < x.ga ? 'L' : 'D'}">${x.gf}-${x.ga}</i></td>${TK.slice(1).map(([k]) => `<td class="n">${x.for[k] == null ? '<span class="muted">—</span>' : `${x.for[k]}-${x.against[k] ?? '—'}`}</td>`).join('')}</tr>`).join('')}</table></div>
+    <h3>Squad</h3><div class="chips">${EV.teamPlayers(id).map(p => `<a class="chip" href="#/player/${p.id}">${esc(p.name)} <small>${p.pos}</small></a>`).join('')}</div>`;
+};
+
+// ================= Fixtures
+EV.viewFixtures = root => {
+  const st = { lg: [], ...EV.sload('fst', {}) };
+  const draw = () => { EV.ssave('fst', st); const fx = EV.FIXTURES.filter(f => !st.lg.length || st.lg.includes(f.league)), days = EV.uniq(fx.map(f => EV.ymd(f.ko))), books = EV.settings.myBooks;
+    root.querySelector('#fres').innerHTML = days.map(d => { const L = fx.filter(f => EV.ymd(f.ko) === d); return `<h2 class="dayh">${esc(EV.dayWord(L[0].ko))} <small class="muted">${esc(EV.fmtDay(L[0].ko))}</small></h2><div class="fxgrid">${L.map(f => { const rs = EV.ROWS_BY_FX.get(f.id) || [], pos = rs.filter(r => { const b = EV.bestPrice(r, books).best; return b && EV.rowEv(r.m, EV.effOdds(b)) > 0; }).length;
+      const pr = ['home', 'draw', 'away'].map(o => EV.teamModel({ mk: 'result', fx: f.id, team: null, side: o, line: null }).p);
+      return `<a class="card fxcard" href="#/fixture/${esc(f.id)}"><div class="fxtop">${EV.leagueBadge(f.league)}<span class="xs muted">${esc(EV.fmtTime(f.ko))}</span></div><div class="fxteams"><b>${esc(EV.TEAM[f.home].name)}</b><b>${esc(EV.TEAM[f.away].name)}</b></div>
+        <div class="fx3"><span><small>Home</small>${EV.pct(pr[0], 0)}</span><span><small>Draw</small>${EV.pct(pr[1], 0)}</span><span><small>Away</small>${EV.pct(pr[2], 0)}</span></div><p class="xs muted">${rs.length} selections · <span class="ev-pos">${pos}</span> EV+ at my bookmakers</p></a>`; }).join('')}</div>`; }).join('') || '<div class="empty"><b>No fixtures for these leagues.</b></div>'; };
+  root.innerHTML = `<header class="phead"><h1>Fixtures</h1><p class="muted">Upcoming demo fixtures, with the demo model's match probabilities. ${EV.demoTag()}</p></header><div class="toolbar">${EV.chips('lg', EV.LEAGUES.map(l => [l.id, l.name]), st.lg)}</div><div id="fres"></div>`;
+  draw(); EV.bindChips(root, (n, v) => { st.lg = v; draw(); });
+};
+EV.viewFixture = (root, id) => {
+  const f = EV.FIXTURE[id]; if (!f) { root.innerHTML = '<div class="empty"><b>Fixture not found.</b><a class="btn" href="#/fixtures">Fixtures</a></div>'; return; }
+  const H = EV.TEAM[f.home], A = EV.TEAM[f.away], books = EV.settings.myBooks;
+  const rs = (EV.ROWS_BY_FX.get(id) || []).map(r => { const { best, n } = EV.bestPrice(r, books); return { r, best, ev: best ? EV.rowEv(r.m, EV.effOdds(best)) : null, score: best ? EV.scoreOf(r.m, best, n) : null }; });
+  const top = rs.filter(x => x.ev > 0 && x.score != null).sort((a, b) => b.score - a.score).slice(0, 10);
+  const res = ['home', 'draw', 'away'].map(o => EV.teamModel({ mk: 'result', fx: id, team: null, side: o, line: null }));
+  const cmp = TK.map(([k, l]) => { const hm = EV.teamMean(f.home, f.away, true, k), am = EV.teamMean(f.away, f.home, false, k); return `<tr><th class="sel">${l}</th><td class="n">${hm.forRate.toFixed(2)}</td><td class="n">${am.againstRate.toFixed(2)}</td><td class="n"><b>${hm.mean.toFixed(2)}</b></td><td class="n"><b>${am.mean.toFixed(2)}</b></td><td class="n">${am.forRate.toFixed(2)}</td><td class="n">${hm.againstRate.toFixed(2)}</td></tr>`; }).join('');
+  root.innerHTML = `<header class="phead"><a class="back" href="#/fixtures">‹ Fixtures</a><h1>${esc(H.name)} v ${esc(A.name)}</h1><p class="muted">${EV.leagueBadge(f.league)} ${esc(EV.dayWord(f.ko))} ${esc(EV.fmtTime(f.ko))} ${EV.demoTag()}</p></header>
+    <div class="kpis three">${res.map((m, i) => `<div class="kpi"><small>${['Home win', 'Draw', 'Away win'][i]}</small><b>${EV.pct(m.p)}</b><span class="xs muted">fair ${esc(EV.fmtOdds(EV.rowFair(m)))}</span>${EV.probBar(m)}</div>`).join('')}</div>
+    <div class="toolbar"><button type="button" class="btn acc" data-fexp>Open this match in EV Explorer</button><a class="btn" href="#/team/${H.id}">${esc(H.name)}</a><a class="btn" href="#/team/${A.id}">${esc(A.name)}</a></div>
+    <h3>Team for v opponent against <small class="muted">(per match, shrunk towards the league average)</small></h3><div class="tblwrap"><table class="tbl compact"><tr><th class="sel">Statistic</th><th class="n">${esc(H.code)} for</th><th class="n">${esc(A.code)} against</th><th class="n">${esc(H.code)} expected</th><th class="n">${esc(A.code)} expected</th><th class="n">${esc(A.code)} for</th><th class="n">${esc(H.code)} against</th></tr>${cmp}</table></div>
+    <h3>Top opportunities in this match <small class="muted">(my bookmakers, Best Overall)</small></h3>${top.length ? `<ol class="toplist">${top.map(x => `<li data-detail="${esc(x.r.id)}" tabindex="0"><div><b>${esc(x.r.subject)}</b><small>${esc(x.r.mkLabel)} · ${esc(EV.selText(x.r))}</small></div><div class="tr"><span>${EV.pct(x.r.m.p)} · fair ${esc(EV.fmtOdds(EV.rowFair(x.r.m)))}</span><span><b>${esc(EV.fmtOdds(x.best.odds))}</b> ${esc(EV.BOOK[x.best.bk].name)} ${EV.evHtml(x.ev)}</span></div></li>`).join('')}</ol>` : '<p class="muted">No positive-EV selections at your bookmakers in this match.</p>'}`;
+  root.addEventListener('click', e => { const d = e.target.closest('[data-detail]'); if (d) EV.openDetail(d.dataset.detail); if (e.target.closest('[data-fexp]')) EV.openExplorer({ tab: 'all', fixtures: [id], sort: 'best' }); });
+};
+})();
+
+/* The EV Hub — Alerts (settings + a local demo simulator) and Settings. No phone notifications are sent in Phase 1. */
+'use strict';
+(() => {
+const EV = window.EV, esc = EV.esc;
+const DEF_RULES = { evMin: 5, leagues: [], cats: ['player', 'team', 'match'], markets: [], books: [], pMin: 40, confMin: 'Medium', oddsImprove: 5, newOnly: true, dedupMin: 60, perHour: 10, maxAgeMin: 15, telegram: false, push: false };
+EV.alertRules = () => ({ ...DEF_RULES, ...EV.load('alerts', {}) });
+let feed = EV.sload('alertFeed', []), tick = EV.sload('alertTick', 0), sent = EV.sload('alertSent', {});
+
+/** One simulated "price update": a deterministic set of demo prices change, then the rules are checked with dedupe, staleness and rate limits. */
+function simulate(R) {
+  tick++; const rng = EV.rng(9000 + tick), now = EV.NOW + tick * 5 * 6e4, out = [], books = R.books.length ? R.books : EV.settings.myBooks, cRank = { any: 0, Low: 1, Medium: 2, High: 3 };
+  const cands = EV.ROWS.filter(r => r.m.ok && (!R.leagues.length || R.leagues.includes(r.league)) && R.cats.includes(r.cat) && (!R.markets.length || R.markets.includes(r.mk)) && r.m.p * 100 >= R.pMin && cRank[r.m.conf.label] >= cRank[R.confMin]);
+  for (let i = 0; i < 40 && cands.length; i++) {
+    const r = cands[Math.floor(rng() * cands.length)], prs = r.prices.filter(p => books.includes(p.bk)); if (!prs.length) continue;
+    const pr = prs[Math.floor(rng() * prs.length)], step = rng() < 0.55 ? 1 : rng() < 0.5 ? 2 : -1, idx = EV.LADDER.findIndex(s => Math.abs(s.dec - pr.odds) < 1e-6), nd = EV.LADDER[EV.clamp(idx + step, 0, EV.LADDER.length - 1)].dec;
+    const age = rng() < 0.15 ? R.maxAgeMin + 5 + rng() * 60 : rng() * 4, q = { ...pr, prev: pr.odds, odds: nd, at: now - age * 6e4 }, ev = EV.rowEv(r.m, EV.effOdds(q)), imp = (nd / pr.odds - 1) * 100;
+    const hit = ev >= R.evMin || (R.oddsImprove > 0 && imp >= R.oddsImprove && ev > 0); if (!hit) continue;
+    const key = `${r.id}|${pr.bk}`, item = { t: now, row: r.id, bk: pr.bk, odds: nd, prev: pr.odds, ev, imp, why: ev >= R.evMin ? `EV ${EV.sgn(ev)} ≥ ${R.evMin}%` : `price up ${imp.toFixed(1)}%` };
+    if (age > R.maxAgeMin) item.blocked = `stale price (${Math.round(age)} min old)`;
+    else if (sent[key] && now - sent[key].t < R.dedupMin * 6e4 && !(nd > sent[key].odds)) item.blocked = 'duplicate (already alerted at this price or better)';
+    else if (feed.filter(x => !x.blocked && now - x.t < 36e5).length + out.filter(x => !x.blocked).length >= R.perHour) item.blocked = `rate limit (${R.perHour} an hour)`;
+    if (!item.blocked) sent[key] = { t: now, odds: nd };
+    out.push(item);
+  }
+  feed = out.concat(feed).slice(0, 80); EV.ssave('alertFeed', feed); EV.ssave('alertTick', tick); EV.ssave('alertSent', sent); return out;
+}
+
+EV.viewAlerts = root => {
+  const R = EV.alertRules(), save = () => EV.save('alerts', R);
+  const feedHtml = () => (feed.length ? `<ul class="alist">${feed.map(a => { const r = EV.ROW[a.row]; if (!r) return ''; return `<li class="${a.blocked ? 'blocked' : ''}" data-detail="${esc(a.row)}" tabindex="0"><div><b>${esc(r.subject)}</b><small>${esc(r.mkLabel)} · ${esc(EV.selText(r))} · ${esc(EV.fxName(EV.FIXTURE[r.fx]))}</small><small class="muted">${esc(EV.fmtTime(a.t))} (simulated) · ${esc(a.why)}</small></div><div class="tr"><span>${esc(EV.BOOK[a.bk].name)} ${esc(EV.fmtOdds(a.prev))} → <b>${esc(EV.fmtOdds(a.odds))}</b></span>${EV.evHtml(a.ev)}${a.blocked ? `<span class="warn xs">Not sent: ${esc(a.blocked)}</span>` : '<span class="xs ev-pos">Would be sent</span>'}</div></li>`; }).join('')}</ul>` : '<p class="muted">No simulated alerts yet. Tap <b>Simulate a price update</b>.</p>');
+  root.innerHTML = `<header class="phead"><h1>Alerts</h1><p class="muted">Choose what should trigger an alert. In Phase 1 alerts are only simulated on this page.</p></header>
+    <div class="banner demo"><b>Phone alerts are not active.</b> Real alerts need the Phase 2 backend (to watch prices when this page is closed) and a delivery channel. Nothing is sent to your phone from this demo.</div>
+    <section class="card"><h2>Alert rules</h2><div class="fgrid">
+      <div class="fr"><span class="flab">EV at least (%)</span><input class="in" inputmode="decimal" data-r="evMin" value="${R.evMin}"></div>
+      <div class="fr"><span class="flab">Model probability at least (%)</span><input class="in" inputmode="decimal" data-r="pMin" value="${R.pMin}"></div>
+      <div class="fr"><span class="flab">Minimum confidence</span>${EV.seg('confMin', [['any', 'Any'], ['Medium', 'Medium+'], ['High', 'High']], R.confMin)}</div>
+      <div class="fr"><span class="flab">Odds improvement at least (%) <small>(price lengthens; 0 = off)</small></span><input class="in" inputmode="decimal" data-r="oddsImprove" value="${R.oddsImprove}"></div>
+      <div class="fr wide"><span class="flab">Leagues <small>(none = all)</small></span>${EV.chips('leagues', EV.LEAGUES.map(l => [l.id, l.name]), R.leagues)}</div>
+      <div class="fr wide"><span class="flab">Market types</span>${EV.chips('cats', [['player', 'Player'], ['team', 'Team'], ['match', 'Match']], R.cats)}</div>
+      <div class="fr wide"><span class="flab">Specific markets <small>(none = all)</small></span>${EV.chips('markets', [...EV.PSTAT_KEYS.map(k => [k, EV.PSTATS[k].label]), ...Object.entries(EV.TMARKETS).map(([k, M]) => [k, M.label])], R.markets)}</div>
+      <div class="fr wide"><span class="flab">Bookmakers <small>(none = my bookmakers)</small></span>${EV.chips('books', EV.BOOKS.map(b => [b.id, b.name]), R.books)}</div></div></section>
+    <section class="card"><h2>Protection</h2><div class="fgrid">
+      <div class="fr"><span class="flab">Ignore prices older than (min)</span><input class="in" inputmode="numeric" data-r="maxAgeMin" value="${R.maxAgeMin}"></div>
+      <div class="fr"><span class="flab">Don't repeat the same alert within (min)</span><input class="in" inputmode="numeric" data-r="dedupMin" value="${R.dedupMin}"><small class="muted">unless the price improves again</small></div>
+      <div class="fr"><span class="flab">At most this many alerts an hour</span><input class="in" inputmode="numeric" data-r="perHour" value="${R.perHour}"></div></div></section>
+    <section class="card"><h2>Delivery</h2>
+      <label class="ck dis"><input type="checkbox" disabled><span><b>Telegram</b> (planned first) — needs the Phase 2 backend and a Telegram bot you create (free). Not available yet.</span></label>
+      <label class="ck dis"><input type="checkbox" disabled><span><b>iPhone notifications</b> (web push) — needs the backend, iOS 16.4 or later, and The EV Hub added to your Home Screen. Not available yet.</span></label>
+      <label class="ck"><input type="checkbox" checked disabled><span><b>On this page (demo)</b> — simulated alerts below.</span></label></section>
+    <section class="card"><div class="ch"><h2>Demo alert simulator</h2>${EV.demoTag('SIMULATION')}</div><p class="xs muted">Each tap moves a set of demo prices and checks your rules, with duplicate, stale-price and rate-limit protection. Times are simulated (5 minutes per tap).</p>
+      <div class="toolbar"><button type="button" class="btn acc" data-sim>Simulate a price update</button><button type="button" class="btn" data-simclear>Clear</button></div><div id="afeed">${feedHtml()}</div></section>`;
+  root.addEventListener('change', e => { const k = e.target.dataset.r; if (k) { R[k] = EV.num(e.target.value) ?? DEF_RULES[k]; save(); } });
+  EV.bindChips(root, (n, v) => { R[n] = v; save(); });
+  root.addEventListener('click', e => { if (e.target.closest('[data-sim]')) { const n = simulate(R), ok = n.filter(x => !x.blocked).length; root.querySelector('#afeed').innerHTML = feedHtml(); EV.toast(`${ok} alert${ok === 1 ? '' : 's'} would be sent · ${n.length - ok} held back`); return; }
+    if (e.target.closest('[data-simclear]')) { feed = []; sent = {}; tick = 0; EV.ssave('alertFeed', feed); EV.ssave('alertSent', sent); EV.ssave('alertTick', 0); root.querySelector('#afeed').innerHTML = feedHtml(); return; }
+    const d = e.target.closest('[data-detail]'); if (d) EV.openDetail(d.dataset.detail); });
+};
+
+EV.viewSettings = root => {
+  const S = EV.settings, draw = () => {
+  root.innerHTML = `<header class="phead"><h1>Settings</h1><p class="muted">Saved in this browser only.</p></header>
+    <section class="card"><h2>Odds format</h2>${EV.seg('oddsFmt', [['dec', 'Decimal 2.50'], ['frac', 'Fractional 6/4'], ['amer', 'American +150']], S.oddsFmt)}<p class="xs muted">Calculations always use decimal odds.</p></section>
+    <section class="card"><h2>My bookmakers</h2><p class="xs muted">Used for “best price at my bookmakers” and EV.</p>${EV.chips('myBooks', EV.BOOKS.map(b => [b.id, b.name]), S.myBooks)}
+      <ul class="xs muted booknotes">${EV.BOOKS.map(b => `<li><b>${esc(b.name)}</b>: ${b.provider === 'live' ? 'listed as live by OddsAPI.dev' : 'listed as “coming soon” by OddsAPI.dev'}${b.exchange ? '; an exchange: EV uses the price after commission' : ''}${b.note ? `; ${esc(b.note)}` : ''}</li>`).join('')}</ul>
+      <div class="fr"><span class="flab">Default prices from</span>${EV.seg('basis', [['mine', 'My bookmakers'], ['all', 'All bookmakers']], S.basis)}</div>
+      <div class="fr"><span class="flab">Betfair Exchange commission (%)</span><input class="in" inputmode="decimal" data-s="commission" value="${S.commission}"></div></section>
+    <section class="card"><h2>Stake calculator</h2><div class="fr"><span class="flab">Bankroll (£)</span><input class="in" inputmode="decimal" data-s="bankroll" value="${S.bankroll}"></div><div class="fr"><span class="flab">Default Kelly fraction</span>${EV.seg('kellyDiv', [['10', '1/10'], ['15', '1/15'], ['20', '1/20']], String(S.kellyDiv))}</div></section>
+    <section class="card"><h2>Data sources</h2><div class="srcs">
+      <div class="src on"><b>Demo data</b><span>Active (Phase 1)</span><small>Synthetic clubs, players, statistics and prices. Nothing is real.</small></div>
+      <div class="src off"><b>OddsAPI.dev</b><span>Phase 2 · not connected</span><small>Odds only. Needs a private backend for the API key. See PHASE-2-PLAN.md.</small></div>
+      <div class="src off"><b>Statistics provider</b><span>Phase 2 · not chosen</span><small>Player and team match statistics and history (licence to be confirmed).</small></div></div></section>
+    <section class="card"><h2>Add to your iPhone Home Screen</h2><ol class="doc"><li>Open The EV Hub in <b>Safari</b>.</li><li>Tap the <b>Share</b> button.</li><li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol><p class="xs muted">It then opens full screen like an app and works offline with the demo data.</p></section>
+    <section class="card"><h2>Reset</h2><div class="toolbar"><button type="button" class="btn" data-reset="filters">Reset Explorer filters</button><button type="button" class="btn" data-reset="presets">Delete filter presets</button><button type="button" class="btn" data-reset="all">Reset everything</button></div></section>
+    <p class="xs muted">The EV Hub ${esc(EV.VERSION)} · Phase 1 demo. Not a bookmaker; no bets are taken or placed.</p>`; };
+  draw();
+  EV.bindChips(root, (n, v) => { if (n === 'myBooks') S.myBooks = v; else if (n === 'kellyDiv') S.kellyDiv = Number(v); else S[n] = v; EV.saveSettings(); if (n === 'oddsFmt') EV.toast('Odds format changed.'); });
+  root.addEventListener('change', e => { const k = e.target.dataset.s; if (k) { S[k] = EV.num(e.target.value) ?? S[k]; EV.saveSettings(); } });
+  root.addEventListener('click', e => { const b = e.target.closest('[data-reset]'); if (!b) return; const k = b.dataset.reset;
+    if (k === 'filters') { EV.filters = { ...EV.DEF_FILTERS }; EV.saveFilters(); EV.toast('Explorer filters reset.'); }
+    if (k === 'presets') { EV.savePresets([]); EV.toast('Presets deleted.'); }
+    if (k === 'all') { try { Object.keys(localStorage).filter(x => x.startsWith('evhub.')).forEach(x => localStorage.removeItem(x)); sessionStorage.clear(); } catch { /* fine */ } EV.resetSettings(); EV.filters = { ...EV.DEF_FILTERS }; EV.toast('Everything reset.'); EV.rerender(root, EV.viewSettings); } });
+};
+})();
+
+/* The EV Hub — navigation and start-up. */
+'use strict';
+(() => {
+const EV = window.EV, esc = EV.esc;
+const NAV = [['', 'Dashboard', 'home'], ['explorer', 'EV Explorer', 'ev'], ['players', 'Player Stats', 'player'], ['teams', 'Team Stats', 'team'], ['fixtures', 'Fixtures', 'cal'], ['alerts', 'Alerts', 'bell'], ['settings', 'Settings', 'gear']];
+const ICON = {
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>', ev: '<path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-7"/>', player: '<circle cx="12" cy="7" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+  team: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>', cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>', bell: '<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4zM10 21h4"/>', gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>' };
+const ico = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
+const TITLES = { '': 'Dashboard', explorer: 'EV Explorer', players: 'Player Stats', player: 'Player', teams: 'Team Stats', team: 'Team', fixtures: 'Fixtures', fixture: 'Fixture', alerts: 'Alerts', settings: 'Settings' };
+
+function shell() {
+  document.body.innerHTML = `<div class="demobar" id="demo" role="note">DEMO MODE — SAMPLE DATA, NOT LIVE BETTING ODDS</div>
+    <header class="top"><a class="brand" href="#/" aria-label="The EV Hub home"><span class="logo" aria-hidden="true">EV</span><span class="bname">The EV Hub</span></a>
+      <nav class="topnav" aria-label="Main">${NAV.map(([k, l, i]) => `<a href="#/${k}" data-nav="${k}">${ico(i)}<span>${l}</span></a>`).join('')}</nav>
+      <div class="topact"><a href="#/alerts" data-nav="alerts" class="iconbtn" aria-label="Alerts">${ico('bell')}</a><a href="#/settings" data-nav="settings" class="iconbtn" aria-label="Settings">${ico('gear')}</a></div></header>
+    <main id="view" tabindex="-1"></main>
+    <nav class="botnav" aria-label="Main">${NAV.slice(0, 5).map(([k, l, i]) => `<a href="#/${k}" data-nav="${k}">${ico(i)}<span>${l.replace(' Stats', '').replace('EV Explorer', 'Explorer')}</span></a>`).join('')}</nav>`;
+}
+EV.route = () => {
+  if (EV._sheet) EV.closeSheet(true);
+  const h = (location.hash || '#/').slice(2), [page, arg] = h.split('/'), v = EV.$('#view');
+  EV.$$('[data-nav]').forEach(a => { const on = a.dataset.nav === page || (page === 'player' && a.dataset.nav === 'players') || (page === 'team' && a.dataset.nav === 'teams') || (page === 'fixture' && a.dataset.nav === 'fixtures'); a.classList.toggle('on', on); on ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'); });
+  const V = { '': EV.viewDashboard, explorer: EV.viewExplorer, players: EV.viewPlayers, player: r => EV.viewPlayer(r, arg), teams: EV.viewTeams, team: r => EV.viewTeam(r, arg), fixtures: EV.viewFixtures, fixture: r => EV.viewFixture(r, arg), alerts: EV.viewAlerts, settings: EV.viewSettings }[page];
+  const fresh = v.cloneNode(false); v.replaceWith(fresh); // drops the old page's listeners
+  if (!V) { fresh.innerHTML = `<div class="empty"><b>Page not found.</b><a class="btn" href="#/">Dashboard</a></div>`; return; }
+  document.title = `${TITLES[page] || 'The EV Hub'} · The EV Hub`;
+  try { V(fresh); } catch (err) { console.error(err); fresh.innerHTML = `<div class="empty"><b>Something went wrong on this page.</b><p class="muted">${esc(err.message)}</p><a class="btn" href="#/">Dashboard</a></div>`; }
+  EV.restoreScroll();
+};
+
+function start() {
+  shell(); addEventListener('hashchange', EV.route); EV.route();
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+EV.start = start;
+})();
+
+(function () { var go = function () { try { window.EV.buildData(); window.EV.start(); } catch (e) { console.error(e); document.body.innerHTML = '<div style="padding:24px;color:#fff;font-family:sans-serif"><h1>The EV Hub</h1><p>The demo could not start: ' + String(e && e.message || e).replace(/</g, '&lt;') + '</p></div>'; } }; setTimeout(go, 30); })();
+</script>
+</body>
+</html>
