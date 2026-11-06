@@ -144,6 +144,19 @@ main{padding:16px 16px calc(var(--bot) + var(--safe-b) + 28px);max-width:1280px;
 @media (min-width:1000px){#toasts{bottom:20px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:560px){.toplist li,.mvlist li,.alist li{flex-wrap:wrap}.toplist li .tr,.mvlist li .tr,.alist li .tr{width:100%;flex-direction:row;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 10px;text-align:left}.toplist li .tr{padding-left:32px}}
+/* front page: best plays to back (owner, 5 Nov 2026) */
+.best{margin:0 0 18px}.besthead h1{font-size:26px;margin:4px 0 2px}.besthead p{margin:4px 0 10px}
+.best>.seg{margin:0 0 10px;display:flex;width:100%}.best>.seg button{flex:1 1 0;padding:8px 6px}
+.bestlg{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 8px;padding:0 16px 2px}.bestlg::-webkit-scrollbar{display:none}.bestlg .chips{flex-wrap:nowrap}.bestlg .chip{flex:0 0 auto;white-space:nowrap}
+.bestopts{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;margin:0 0 12px}
+.plays{list-style:none;margin:0;padding:0;display:grid;gap:8px}@media (min-width:1000px){.plays{grid-template-columns:1fr 1fr}}
+.play{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;cursor:pointer;min-width:0}
+.play:hover,.play:focus{border-color:#2F4A3B;outline:none}
+.prank{flex:0 0 26px;height:26px;display:grid;place-items:center;border-radius:8px;background:var(--panel3);color:var(--muted);font-size:12px;font-weight:800}
+.pmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.pmain b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.psel{font-size:14px}.pmain small{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pnums{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right}.podds b{font-size:18px}.podds small{color:var(--muted);font-size:11px;display:block}.pnums>small{color:var(--muted);font-size:11px}.pnums .ev-pos{font-size:15px}
+.bestfoot{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:12px}
+.morehead{margin-top:26px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
 </style>
 </head>
 <body>
@@ -152,7 +165,7 @@ main{padding:16px 16px calc(var(--bot) + var(--safe-b) + 28px);max-width:1280px;
 <script>/* The EV Hub — core helpers (no dependencies). Everything lives on window.EV. */
 'use strict';
 const EV = (window.EV = window.EV || {});
-EV.VERSION = '7aa4d8b97c';
+EV.VERSION = '7ee6795b19';
 EV.DEMO = true; // Phase 1: every figure comes from the bundled synthetic dataset
 
 // ---------- small helpers
@@ -227,6 +240,9 @@ EV.ymd = t => UKY.format(new Date(t));
 EV.fmtKO = t => UK.format(new Date(t)).replace(',', '');
 EV.fmtDay = t => UKD.format(new Date(t));
 EV.fmtTime = t => UKT.format(new Date(t));
+/** Is kick-off time t inside a window: all, today, tomorrow, 3d (today + next 2 days), week (today + next 6 days)? (UK dates) */
+EV.inWindow = (t, w, now = EV.NOW || Date.now()) => { if (!w || w === 'all') return true; const d = EV.ymd(t), today = EV.ymd(now); if (w === 'today') return d === today; if (w === 'tomorrow') return d === EV.ymd(now + 864e5);
+  const n = w === '3d' ? 2 : 6; return d >= today && d <= EV.ymd(now + n * 864e5); };
 EV.dayWord = t => { const d = EV.ymd(t), n = EV.ymd(Date.now()), tm = EV.ymd(Date.now() + 864e5); return d === n ? 'Today' : d === tm ? 'Tomorrow' : EV.fmtDay(t); };
 EV.ago = t => { const m = Math.round((Date.now() - t) / 6e4); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ${m % 60} min ago`; };
 
@@ -242,7 +258,7 @@ EV.ssave = (k, v) => { try { sessionStorage.setItem('evhub.' + k, JSON.stringify
 const EV = window.EV;
 EV.ago = t => { const m = Math.max(0, Math.round((EV.NOW - t) / 6e4)); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ${m % 60} min ago`; };
 
-const DEF_SETTINGS = { oddsFmt: 'dec', myBooks: ['b365', 'pp', 'mgm', 'bfx'], basis: 'mine', commission: 5, kellyDiv: 10, bankroll: 100, cols: null, dashLeagues: [], dashBasis: 'mine' };
+const DEF_SETTINGS = { oddsFmt: 'dec', myBooks: ['b365', 'pp', 'mgm', 'bfx'], basis: 'mine', commission: 5, kellyDiv: 10, bankroll: 100, cols: null, dashLeagues: [], dashBasis: 'mine', bestWhen: 'today', bestCats: [], bestN: 15 };
 EV.settings = { ...DEF_SETTINGS, ...EV.load('settings', {}) };
 EV.saveSettings = () => EV.save('settings', EV.settings);
 EV.resetSettings = () => { EV.settings = { ...DEF_SETTINGS }; EV.saveSettings(); };
@@ -255,7 +271,7 @@ EV.visibleCols = () => { const c = EV.settings.cols; return EV.COLS.filter(([k, 
 
 EV.SORTS = [['evDesc', 'Highest positive EV'], ['evAsc', 'Lowest EV'], ['pDesc', 'Highest model probability'], ['pAsc', 'Lowest model probability'], ['best', 'Best Overall (illustrative)'], ['hitDesc', 'Highest historical hit rate'], ['oddsDesc', 'Highest bookmaker odds'], ['ko', 'Earliest kick-off'], ['name', 'Player / team name']];
 EV.DEF_FILTERS = { tab: 'player', when: 'all', leagues: [], fixtures: [], q: '', markets: [], pMin: '', pMax: '', evMin: '', evMax: '', fairMin: '', fairMax: '', oddsMin: '', oddsMax: '',
-  hitMin: '', hitWin: 'l10', sampleMin: '', books: 'basis', bookList: [], evSign: 'all', venue: 'all', minsMin: '', confMin: 'any', priced: false, sort: 'best' };
+  hitMin: '', hitWin: 'l10', ou: 'all', sampleMin: '', books: 'basis', bookList: [], evSign: 'all', venue: 'all', minsMin: '', confMin: 'any', priced: false, sort: 'best' };
 EV.filters = { ...EV.DEF_FILTERS, ...EV.load('filters', {}) };
 EV.saveFilters = () => EV.save('filters', EV.filters);
 EV.presets = () => EV.load('presets', []);
@@ -778,7 +794,9 @@ EV.explorerRows = (f = EV.filters) => {
   const out = [];
   for (const r of EV.ROWS) {
     if (f.tab !== 'all' && r.cat !== f.tab) continue;
-    if (f.when !== 'all') { const d = EV.ymd(r.ko); if ((f.when === 'today' && d !== today) || (f.when === 'tomorrow' && d !== tomorrow)) continue; }
+    if (f.when !== 'all' && !EV.inWindow(r.ko, f.when)) continue; void today; void tomorrow;
+    if (f.ou === 'over' && !(r.cat === 'player' || r.side === 'over')) continue; // player markets are all "X or more"
+    if (f.ou === 'under' && r.side !== 'under') continue;
     if (f.leagues.length && !f.leagues.includes(r.league)) continue;
     if (f.fixtures.length && !f.fixtures.includes(r.fx)) continue;
     if (f.markets.length && !f.markets.includes(r.mk)) continue;
@@ -851,7 +869,8 @@ function filtersHtml() {
   const fxs = EV.FIXTURES.filter(fx => !f.leagues.length || f.leagues.includes(fx.league)), presets = EV.presets();
   const rng = (lab, a, b, unit = '', hint = '') => `<div class="fr"><span class="flab">${esc(lab)}</span><div class="rng"><input class="in" inputmode="decimal" data-f="${a}" value="${esc(f[a])}" placeholder="min${unit}" aria-label="${esc(lab)} minimum"><span>to</span><input class="in" inputmode="decimal" data-f="${b}" value="${esc(f[b])}" placeholder="max${unit}" aria-label="${esc(lab)} maximum"></div>${hint ? `<small class="muted">${esc(hint)}</small>` : ''}</div>`;
   return `<div class="fgrid">
-    <div class="fr wide"><span class="flab">When</span>${EV.seg('when', [['all', 'Upcoming'], ['today', 'Today'], ['tomorrow', 'Tomorrow']], f.when)}</div>
+    <div class="fr wide"><span class="flab">When</span>${EV.seg('when', [['today', 'Today'], ['tomorrow', 'Tomorrow'], ['3d', 'Next 3 days'], ['week', 'This week'], ['all', 'All upcoming']], f.when)}</div>
+    <div class="fr wide"><span class="flab">Over / under</span>${EV.seg('ou', [['all', 'Both'], ['over', 'Overs only'], ['under', 'Unders only']], f.ou)}<small class="muted">Player markets are “X or more” (overs). Unders are available for team and match totals. Overs/unders hides results, double chance, BTTS and handicaps.</small></div>
     <div class="fr wide"><span class="flab">Leagues</span>${EV.chips('leagues', EV.LEAGUES.map(l => [l.id, l.name]), f.leagues)}<small class="muted">None ticked = every league</small></div>
     <div class="fr wide"><span class="flab">Fixtures <small data-fxcount>(${f.fixtures.length ? `${f.fixtures.length} chosen` : 'all'})</small></span><div class="fxbox">${fxs.map(fx => `<label class="ck"><input type="checkbox" data-fx value="${esc(fx.id)}"${f.fixtures.includes(fx.id) ? ' checked' : ''}><span>${esc(fxShort(fx))} <small>${esc(EV.dayWord(fx.ko))} ${esc(EV.fmtTime(fx.ko))}</small></span></label>`).join('')}</div><button type="button" class="linkbtn" data-clearfx${f.fixtures.length ? '' : ' hidden'}>Clear fixtures</button></div>
     <div class="fr wide"><span class="flab">Markets</span>${EV.chips('markets', mks, f.markets)}</div>
@@ -911,7 +930,7 @@ EV.viewExplorer = root => {
     const d = t.closest('[data-detail]'); if (d) { EV.openDetail(d.dataset.detail); } });
   root.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('tr[data-detail]')) EV.openDetail(e.target.dataset.detail); });
 };
-function activeCount() { const f = EV.filters, D = EV.DEF_FILTERS; return ['when', 'q', 'pMin', 'pMax', 'evMin', 'evMax', 'fairMin', 'fairMax', 'oddsMin', 'oddsMax', 'hitMin', 'sampleMin', 'minsMin', 'evSign', 'venue', 'confMin', 'priced'].filter(k => f[k] !== D[k]).length + (f.leagues.length ? 1 : 0) + (f.fixtures.length ? 1 : 0) + (f.markets.length ? 1 : 0) + (f.books !== 'basis' ? 1 : 0); }
+function activeCount() { const f = EV.filters, D = EV.DEF_FILTERS; return ['when', 'ou', 'q', 'pMin', 'pMax', 'evMin', 'evMax', 'fairMin', 'fairMax', 'oddsMin', 'oddsMax', 'hitMin', 'sampleMin', 'minsMin', 'evSign', 'venue', 'confMin', 'priced'].filter(k => f[k] !== D[k]).length + (f.leagues.length ? 1 : 0) + (f.fixtures.length ? 1 : 0) + (f.markets.length ? 1 : 0) + (f.books !== 'basis' ? 1 : 0); }
 /** Open the Explorer with some filters set (from other pages). */
 EV.openExplorer = patch => { Object.assign(EV.filters, { ...EV.DEF_FILTERS, sort: EV.filters.sort, ...patch }); EV.saveFilters(); EV.ssave('scroll:#/explorer', 0); if (location.hash === '#/explorer') EV.route(); else location.hash = '#/explorer'; };
 EV.scoreDoc = () => EV.sheet(`<h2>How “Best Overall” works <span class="demotag">ILLUSTRATIVE DEMO SCORE</span></h2>
@@ -1030,25 +1049,45 @@ function warnings(r0, m) { const w = ['<b>Demo model on synthetic data.</b> Not 
 const EV = window.EV, esc = EV.esc;
 
 // ================= Dashboard
+/** The plays shown on the front page: positive EV at my bookmakers, Medium or High confidence, 8+ matches, ranked by Best Overall. */
+EV.bestPlays = ({ when, leagues, cats, books }) => {
+  const out = [];
+  for (const r of EV.ROWS) { if ((leagues.length && !leagues.includes(r.league)) || (cats.length && !cats.includes(r.cat)) || !EV.inWindow(r.ko, when) || !r.m.ok) continue;
+    if (!(r.m.n >= 8) || r.m.conf.label === 'Low') continue; const { best, n } = EV.bestPrice(r, books); if (!best) continue; const ev = EV.rowEv(r.m, EV.effOdds(best)); if (!(ev > 0)) continue;
+    const score = EV.scoreOf(r.m, best, n); if (score == null) continue; out.push({ r, best, n, ev, score }); }
+  out.sort((a, b) => b.score - a.score || b.ev - a.ev);
+  // one play per player / team per market per match at most (its best line), so the list is not one player at five lines
+  const seen = new Set(); return out.filter(x => { const k = `${x.r.fx}|${x.r.pid || x.r.team || 'm'}|${x.r.mk}`; if (seen.has(k)) return false; seen.add(k); return true; });
+};
+const WHEN = [['today', 'Today'], ['tomorrow', 'Tomorrow'], ['3d', 'Next 3 days'], ['week', 'This week']];
+const playCard = (x, i) => { const r = x.r, fx = EV.FIXTURE[r.fx];
+  return `<li class="play" data-detail="${esc(r.id)}" tabindex="0"><span class="prank">${i + 1}</span><div class="pmain"><b>${esc(r.subject)}</b><span class="psel">${esc(r.cat === 'player' ? EV.selText(r) : `${r.mkLabel}: ${EV.selText(r)}`)}</span><small>${EV.leagueBadge(r.league)} ${esc(EV.fxName(fx))} · ${esc(EV.dayWord(fx.ko))} ${esc(EV.fmtTime(fx.ko))}</small></div>
+    <div class="pnums"><span class="podds"><b>${esc(EV.fmtOdds(x.best.odds))}</b> <small>${esc(EV.BOOK[x.best.bk].name)}</small></span>${EV.evHtml(x.ev)}<small>${EV.pct(r.m.p)} · fair ${esc(EV.fmtOdds(EV.rowFair(r.m)))}</small>${EV.confHtml(r.m.conf)}</div></li>`; };
 EV.viewDashboard = root => {
   const S = EV.settings, lgs = S.dashLeagues, books = S.dashBasis === 'all' ? EV.BOOKS.map(b => b.id) : S.myBooks;
+  const when = S.bestWhen || 'today'; let plays = EV.bestPlays({ when, leagues: lgs, cats: S.bestCats || [], books }), fell = null;
+  if (!plays.length && when === 'today') { const t = EV.bestPlays({ when: 'tomorrow', leagues: lgs, cats: S.bestCats || [], books }); if (t.length) { fell = 'tomorrow'; plays = t; } }
   const fxs = EV.FIXTURES.filter(f => !lgs.length || lgs.includes(f.league));
   const rows = EV.ROWS.filter(r => !lgs.length || lgs.includes(r.league)).map(r => { const { best, n } = EV.bestPrice(r, books); const ev = best ? EV.rowEv(r.m, EV.effOdds(best)) : null; return { r, best, n, ev, score: best ? EV.scoreOf(r.m, best, n) : null }; });
-  const pos = rows.filter(x => x.ev > 0), top = rows.filter(x => x.score != null && x.ev > 0).sort((a, b) => b.score - a.score).slice(0, 8);
+  const pos = rows.filter(x => x.ev > 0);
   const allP = EV.ROWS.flatMap(r => r.prices), stale = allP.filter(p => !EV.isFresh(p)).length, newest = Math.max(...allP.map(p => p.at));
   const moves = []; for (const r of EV.ROWS) { if (lgs.length && !lgs.includes(r.league)) continue; for (const p of r.prices) if (EV.isFresh(p) && books.includes(p.bk) && p.prev !== p.odds) moves.push({ r, p, ch: p.odds / p.prev - 1 }); }
   moves.sort((a, b) => Math.abs(1 / b.p.prev - 1 / b.p.odds) - Math.abs(1 / a.p.prev - 1 / a.p.odds)); // biggest change in implied probability
   const hist = [-20, -15, -10, -5, 0, 5, 10, 15].map((a, i, arr) => ({ a, b: arr[i + 1] ?? Infinity, n: rows.filter(x => x.ev != null && x.ev >= a && x.ev < (arr[i + 1] ?? Infinity)).length }));
   const hmax = Math.max(1, ...hist.map(h => h.n));
-  root.innerHTML = `<section class="hero"><div><p class="eyebrow">Football odds &amp; expected value</p><h1>The EV Hub</h1><p class="muted">Model probabilities, fair odds and EV for player, team and match markets, compared across bookmakers.</p></div>
-      <div class="herocta"><a class="btn acc" href="#/explorer">Open EV Explorer</a><a class="btn" href="#/fixtures">Fixtures</a></div></section>
-    <div class="banner demo"><b>DEMO MODE — SAMPLE DATA, NOT LIVE BETTING ODDS.</b> Clubs, players, statistics and prices are synthetic. Nothing on this site is a real recommendation.</div>
-    <div class="dashf"><div><span class="xs muted">Leagues</span>${EV.chips('dashLeagues', EV.LEAGUES.map(l => [l.id, l.name]), lgs)}</div><div><span class="xs muted">Bookmakers</span>${EV.seg('dashBasis', [['mine', `My bookmakers (${S.myBooks.length})`], ['all', 'All']], S.dashBasis)}</div></div>
+  const N = S.bestN || 15, wl = (WHEN.find(w => w[0] === when) || WHEN[0])[1].toLowerCase(), title = fell ? 'tomorrow' : when === 'today' || when === 'tomorrow' ? when : wl;
+  root.innerHTML = `<section class="best"><div class="besthead"><h1>Best plays to back ${esc(title)}</h1>
+        <p class="muted xs">Positive EV at ${esc(S.dashBasis === 'all' ? 'all bookmakers' : 'your bookmakers')}, Medium or High confidence, ranked by Best Overall (<button type="button" class="linkbtn" data-scoredoc>how</button>). ${EV.demoTag()}</p></div>
+      ${EV.seg('bestWhen', WHEN, when)}
+      <div class="bestlg"><button type="button" class="chip${lgs.length ? '' : ' on'}" data-alllg aria-pressed="${!lgs.length}">All leagues</button>${EV.chips('dashLeagues', EV.LEAGUES.map(l => [l.id, l.name]), lgs)}</div>
+      <div class="bestopts">${EV.chips('bestCats', [['player', 'Players'], ['team', 'Teams'], ['match', 'Match']], S.bestCats || [])}${EV.seg('dashBasis', [['mine', 'My bookmakers'], ['all', 'All bookmakers']], S.dashBasis)}</div>
+      ${fell ? '<div class="banner">No games left today in these leagues, so these are <b>tomorrow&rsquo;s</b> best plays.</div>' : ''}
+      ${plays.length ? `<ol class="plays">${plays.slice(0, N).map(playCard).join('')}</ol>${plays.length > N ? `<button type="button" class="btn wide" data-bestmore>Show more (${plays.length - N} more)</button>` : ''}`
+        : `<div class="empty"><b>No plays pass the checks for ${esc(title)}.</b><p class="muted">Try another day or more leagues. Nothing is shown just to fill the list.</p></div>`}
+      <div class="bestfoot"><a class="btn" href="#/explorer">Find your own in EV Explorer</a><span class="xs muted">DEMO MODE — sample data, not live betting odds. Not betting advice.</span></div></section>
+    <h2 class="morehead">More</h2>
     <div class="kpis">${[[fxs.length, 'Upcoming fixtures'], [`<span class="ev-pos">${pos.length.toLocaleString('en-GB')}</span>`, 'Positive-EV selections'], [rows.length.toLocaleString('en-GB'), 'Selections priced by the model'], [pos.length ? `<span class="ev-pos">${EV.sgn(Math.max(...pos.map(x => x.ev)))}</span>` : '—', 'Highest EV'], [books.length, 'Bookmakers counted'], [EV.fmtTime(newest), 'Latest demo price']].map(([v, l]) => `<div class="kpi"><small>${l}</small><b>${v}</b></div>`).join('')}</div>
     <div class="grid2">
-      <section class="card"><div class="ch"><h2>Highest-ranked opportunities</h2>${EV.demoTag()}</div><p class="xs muted">Ranked by Best Overall, an illustrative cautious score (<button type="button" class="linkbtn" data-scoredoc>how it works</button>). Not a recommendation.</p>
-        ${top.length ? `<ol class="toplist">${top.map(x => `<li data-detail="${esc(x.r.id)}" tabindex="0"><div><b>${esc(x.r.subject)}</b><small>${esc(x.r.mkLabel)} · ${esc(EV.selText(x.r))} · ${esc(EV.fxName(EV.FIXTURE[x.r.fx]))}</small></div><div class="tr"><span>${EV.pct(x.r.m.p)} · fair ${esc(EV.fmtOdds(EV.rowFair(x.r.m)))}</span><span><b>${esc(EV.fmtOdds(x.best.odds))}</b> ${esc(EV.BOOK[x.best.bk].name)} ${EV.evHtml(x.ev)}</span></div></li>`).join('')}</ol>` : '<p class="muted">No positive-EV selections for these filters.</p>'}
-        <a class="btn wide" href="#/explorer" data-quick="best">See every selection</a></section>
       <section class="card"><div class="ch"><h2>Upcoming fixtures</h2></div><ul class="fxlist">${fxs.slice(0, 8).map(f => { const n = rows.filter(x => x.r.fx === f.id && x.ev > 0).length; return `<li><a href="#/fixture/${esc(f.id)}"><span>${EV.leagueBadge(f.league)} <b>${esc(EV.TEAM[f.home].name)}</b> v <b>${esc(EV.TEAM[f.away].name)}</b></span><small>${esc(EV.dayWord(f.ko))} ${esc(EV.fmtTime(f.ko))} · <span class="ev-pos">${n}</span> EV+</small></a></li>`; }).join('')}</ul><a class="btn wide" href="#/fixtures">All fixtures</a></section>
       <section class="card"><div class="ch"><h2>Recent odds movements</h2>${EV.demoTag()}</div><ul class="mvlist">${moves.slice(0, 8).map(x => `<li data-detail="${esc(x.r.id)}" tabindex="0"><div><b>${esc(x.r.subject)}</b><small>${esc(x.r.mkLabel)} · ${esc(EV.selText(x.r))} · ${esc(EV.BOOK[x.p.bk].name)}</small></div><div class="tr">${EV.spark(EV.priceHist(x.r.id, x.p))}<span>${esc(EV.fmtOdds(x.p.prev))} → <b>${esc(EV.fmtOdds(x.p.odds))}</b></span></div></li>`).join('') || '<li class="muted">No recent changes.</li>'}</ul></section>
       <section class="card"><div class="ch"><h2>EV across all selections</h2></div><div class="hist">${hist.map(h => `<div class="hb"><i class="${h.a >= 0 ? 'ev-posbg' : 'ev-negbg'}" style="height:${(h.n / hmax) * 100}%"></i><small>${h.a < -15 ? '< −15' : h.a >= 15 ? '15+' : `${h.a > 0 ? '+' : ''}${h.a}`}</small><b>${h.n}</b></div>`).join('')}</div><p class="xs muted">EV % at the best current price (${esc(S.dashBasis === 'all' ? 'all bookmakers' : 'my bookmakers')}). Most selections are negative: bookmakers build a margin into every price.</p>
@@ -1059,8 +1098,10 @@ EV.viewDashboard = root => {
         <div class="src off"><b>Player &amp; team statistics</b><span>Not connected · Phase 2</span><small>OddsAPI.dev supplies odds only; a licensed statistics provider is still to be chosen</small></div>
         <div class="src off"><b>Probability model</b><span>Demo model · not trained on real football</span><small>A real model needs licensed history, backtesting and calibration first</small></div></div></section>
     </div>`;
-  EV.bindChips(root, (n, v) => { if (n === 'dashLeagues') S.dashLeagues = v; if (n === 'dashBasis') S.dashBasis = v; EV.saveSettings(); EV.rerender(root, EV.viewDashboard); });
-  root.addEventListener('click', e => { const d = e.target.closest('[data-detail]'); if (d) { EV.openDetail(d.dataset.detail); return; } if (e.target.closest('[data-scoredoc]')) { EV.scoreDoc(); return; }
+  const redraw = () => { EV.saveSettings(); const y = scrollY; EV.rerender(root, EV.viewDashboard); scrollTo(0, y); };
+  EV.bindChips(root, (n, v) => { if (n === 'dashLeagues') S.dashLeagues = v; if (n === 'dashBasis') S.dashBasis = v; if (n === 'bestWhen') S.bestWhen = v; if (n === 'bestCats') S.bestCats = v; S.bestN = 15; redraw(); });
+  root.addEventListener('click', e => { if (e.target.closest('[data-alllg]')) { S.dashLeagues = []; redraw(); return; } if (e.target.closest('[data-bestmore]')) { S.bestN = (S.bestN || 15) + 15; redraw(); return; }
+    const d = e.target.closest('[data-detail]'); if (d) { EV.openDetail(d.dataset.detail); return; } if (e.target.closest('[data-scoredoc]')) { EV.scoreDoc(); return; }
     const q = e.target.closest('[data-quick]'); if (!q) return; e.preventDefault(); const v = q.dataset.quick, L = S.dashLeagues;
     EV.openExplorer(v === 'pos' ? { tab: 'all', when: 'today', evSign: 'pos', sort: 'evDesc', leagues: L } : v === 'shots' ? { tab: 'player', markets: ['shots', 'sot'], leagues: L } : v === 'corners' ? { tab: 'all', markets: ['mcorners', 'tcorners'], leagues: L } : v === 'goals' ? { tab: 'match', markets: ['mgoals', 'btts'], leagues: L } : { tab: 'all', sort: 'best', leagues: L }); });
   root.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-detail]')) EV.openDetail(e.target.dataset.detail); });
@@ -1262,12 +1303,12 @@ EV.viewSettings = root => {
 'use strict';
 (() => {
 const EV = window.EV, esc = EV.esc;
-const NAV = [['', 'Dashboard', 'home'], ['explorer', 'EV Explorer', 'ev'], ['players', 'Player Stats', 'player'], ['teams', 'Team Stats', 'team'], ['fixtures', 'Fixtures', 'cal'], ['alerts', 'Alerts', 'bell'], ['settings', 'Settings', 'gear']];
+const NAV = [['', 'Best Plays', 'home'], ['explorer', 'EV Explorer', 'ev'], ['players', 'Player Stats', 'player'], ['teams', 'Team Stats', 'team'], ['fixtures', 'Fixtures', 'cal'], ['alerts', 'Alerts', 'bell'], ['settings', 'Settings', 'gear']];
 const ICON = {
   home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>', ev: '<path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-7"/>', player: '<circle cx="12" cy="7" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
   team: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>', cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>', bell: '<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4zM10 21h4"/>', gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>' };
 const ico = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
-const TITLES = { '': 'Dashboard', explorer: 'EV Explorer', players: 'Player Stats', player: 'Player', teams: 'Team Stats', team: 'Team', fixtures: 'Fixtures', fixture: 'Fixture', alerts: 'Alerts', settings: 'Settings' };
+const TITLES = { '': 'Best plays', explorer: 'EV Explorer', players: 'Player Stats', player: 'Player', teams: 'Team Stats', team: 'Team', fixtures: 'Fixtures', fixture: 'Fixture', alerts: 'Alerts', settings: 'Settings' };
 
 function shell() {
   document.body.innerHTML = `<div class="demobar" id="demo" role="note">DEMO MODE — SAMPLE DATA, NOT LIVE BETTING ODDS</div>
@@ -1275,7 +1316,7 @@ function shell() {
       <nav class="topnav" aria-label="Main">${NAV.map(([k, l, i]) => `<a href="#/${k}" data-nav="${k}">${ico(i)}<span>${l}</span></a>`).join('')}</nav>
       <div class="topact"><a href="#/alerts" data-nav="alerts" class="iconbtn" aria-label="Alerts">${ico('bell')}</a><a href="#/settings" data-nav="settings" class="iconbtn" aria-label="Settings">${ico('gear')}</a></div></header>
     <main id="view" tabindex="-1"></main>
-    <nav class="botnav" aria-label="Main">${NAV.slice(0, 5).map(([k, l, i]) => `<a href="#/${k}" data-nav="${k}">${ico(i)}<span>${l.replace(' Stats', '').replace('EV Explorer', 'Explorer')}</span></a>`).join('')}</nav>`;
+    <nav class="botnav" aria-label="Main">${NAV.slice(0, 5).map(([k, l, i]) => `<a href="#/${k}" data-nav="${k}">${ico(i)}<span>${l.replace(' Stats', '').replace('EV Explorer', 'Explorer').replace('Best Plays', 'Best')}</span></a>`).join('')}</nav>`;
 }
 EV.route = () => {
   if (EV._sheet) EV.closeSheet(true);
